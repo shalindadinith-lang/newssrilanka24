@@ -511,22 +511,22 @@
 
         async function fetchNews() {
             let rssArticles = [];
-            let firebaseArticles = [];
+            let supabaseArticles = [];
 
-            // RSS fail වුණොත් Firebase news පෙන්වයි.
+            // RSS fail වුණොත් Supabase news පෙන්වයි.
             try {
                 rssArticles = await fetchAllFeeds();
             } catch(e) {
                 console.warn('RSS feeds failed:', e);
             }
 
-            // Firebase fail වුණොත් RSS news පෙන්වයි.
-            // Dynamic import නිසා Firebase SDK CDN එක fail වුණත් RSS system එකට බලපාන්නේ නැහැ.
+            // Supabase fail වුණොත් RSS news පෙන්වයි.
+            // Dynamic import නිසා Supabase CDN එක fail වුණත් RSS system එකට බලපාන්නේ නැහැ.
             try {
-                const fbModule = await import('./firebase-news.js');
-                firebaseArticles = await fbModule.fetchFirebaseNews();
+                const sbModule = await import('./supabase-news.js');
+                supabaseArticles = await sbModule.fetchSupabaseNews();
             } catch(e) {
-                console.warn('Firebase news failed:', e);
+                console.warn('Supabase news failed:', e);
             }
 
             const rssMapped = rssArticles.map(item => ({
@@ -541,7 +541,7 @@
                 content: item.content || ''
             }));
 
-            allArticles = [...firebaseArticles, ...rssMapped];
+            allArticles = [...supabaseArticles, ...rssMapped];
 
             if (allArticles.length === 0) {
                 document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">පුවත් ලබාගැනීම අසාර්ථකයි.</div>';
