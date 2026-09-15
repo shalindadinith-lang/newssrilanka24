@@ -104,40 +104,33 @@
 
 
 
-
-
-
-
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     
-    <!-- SEO Meta Tags (Piuma News) -->
+    <!-- SEO Meta Tags -->
     <title>newssrilanka24.com.lk | පුවත්</title>
     <meta name="description" content="සිංහල පුවත් සාරාංශ, ක්‍රීඩා, තාක්ෂණය, ව්‍යාපාරික පුවත් එකම තැනකින්.">
-    <link rel="canonical" href="https://yourdomain.com/">
+    <link rel="canonical" href="https://newssrilanka24.com.lk/">
 
     <!-- Open Graph (Facebook, LinkedIn) -->
     <meta property="og:title" content="newssrilanka24.com.lk">
     <meta property="og:description" content="සැබෑ කාලීන සිංහල පුවත් සාරාංශ.">
-    <meta property="og:image" content="https://yourdomain.com/logo.png">
-    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:image" content="https://newssrilanka24.com.lk/logo.png">
+    <meta property="og:url" content="https://newssrilanka24.com.lk/">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="newssrilanka24.com.lk">
     <meta name="twitter:description" content="සිංහල පුවත් එකතුව.">
-    <meta name="twitter:image" content="https://yourdomain.com/logo.png">
+    <meta name="twitter:image" content="https://newssrilanka24.com.lk/logo.png">
 
     <!-- Structured Data (Organization) -->
     <script type="application/ld+json" id="base-ld">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "newssrilanka24.com.lk",
-        "url": "https://yourdomain.com/",
-        "logo": "https://yourdomain.com/logo.png"
+        "name": "News Sri Lanka 24",
+        "url": "https://newssrilanka24.com.lk/",
+        "logo": "https://newssrilanka24.com.lk/logo.png"
     }
     </script>
 
@@ -231,16 +224,40 @@
             color: white;
             cursor: pointer;
         }
-        .categories button {
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .categories button, .lang-btn {
             background: var(--surface);
             border: 1px solid var(--border);
             padding: 8px 18px;
             border-radius: 40px;
             cursor: pointer;
+            color: var(--text);
         }
-        .cat-btn.active, .cat-btn:hover {
+        .cat-btn.active, .cat-btn:hover, .lang-btn.active, .lang-btn:hover {
             background: var(--primary);
             color: white;
+        }
+        .lang-divider { color: var(--border); padding: 0 2px; align-self: center; font-weight: 700; }
+        .cat-tag {
+            display: inline-flex;
+            background: var(--primary);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .full-content {
+            margin-top: 12px;
+            line-height: 1.9;
+            background: var(--surface);
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
         }
         .slider-container {
             max-width: 1400px;
@@ -358,6 +375,7 @@
             border-top: 1px solid var(--border);
             margin-top: 40px;
         }
+        footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
         @media (max-width: 700px) {
             .slider-container { height: 250px; }
             .news-grid { grid-template-columns: 1fr; }
@@ -372,7 +390,7 @@
                 <h1><i class="fas fa-newspaper"></i> newssrilanka24.com.lk</h1>
             </div>
             <div class="controls">
-                <!-- Dark Mode Toggle පමණක් ඉතිරි කර ඇත -->
+                <!-- Dark Mode Toggle -->
                 <button class="dark-toggle" id="darkModeToggle"><i class="fas fa-moon"></i> අඳුරු</button>
             </div>
         </div>
@@ -390,10 +408,19 @@
         </div>
         <div class="categories">
             <button class="cat-btn active" data-cat="all">සියල්ල</button>
+            <button class="cat-btn" data-cat="general">සාමාන්‍ය</button>
+            <button class="cat-btn" data-cat="sri-lanka">ශ්‍රී ලංකා</button>
             <button class="cat-btn" data-cat="world">ලෝකය</button>
             <button class="cat-btn" data-cat="technology">තාක්ෂණය</button>
             <button class="cat-btn" data-cat="sports">ක්‍රීඩා</button>
             <button class="cat-btn" data-cat="business">ව්‍යාපාර</button>
+            <button class="cat-btn" data-cat="entertainment">විනෝදාස්වාදය</button>
+            <button class="cat-btn" data-cat="education">අධ්‍යාපනය</button>
+            <button class="cat-btn" data-cat="health">සෞඛ්‍ය</button>
+            <span class="lang-divider">|</span>
+            <button class="lang-btn active" data-lang="all">සියලුම</button>
+            <button class="lang-btn" data-lang="si">සිංහල</button>
+            <button class="lang-btn" data-lang="en">English</button>
         </div>
     </div>
 
@@ -411,7 +438,7 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
         // RSS සංග්‍රහ
         const RSS_FEEDS = [
             'https://api.rss2json.com/v1/api.json?rss_url=https://www.lankacnews.com/feeds/posts/default?alt=rss',
@@ -419,21 +446,41 @@
             // වෙනත් feeds...
         ];
 
+        const CATEGORY_LABELS = {
+            'general': 'සාමාන්‍ය',
+            'sri-lanka': 'ශ්‍රී ලංකා',
+            'world': 'ලෝකය',
+            'technology': 'තාක්ෂණය',
+            'sports': 'ක්‍රීඩා',
+            'business': 'ව්‍යාපාර',
+            'entertainment': 'විනෝදාස්වාදය',
+            'education': 'අධ්‍යාපනය',
+            'health': 'සෞඛ්‍ය'
+        };
+
         let allArticles = [];
         let filteredArticles = [];
         let currentCategory = 'all';
+        let currentLanguage = 'all';
         let searchTerm = '';
 
-        // --- Piuma News Default Meta Values ---
-        const DEFAULT_TITLE = 'Piuma News | පුවත්';
+        // --- Default Meta Values ---
+        const DEFAULT_TITLE = 'newssrilanka24.com.lk | පුවත්';
         const DEFAULT_DESCRIPTION = 'සිංහල පුවත් සාරාංශ, ක්‍රීඩා, තාක්ෂණය, ව්‍යාපාරික පුවත් එකම තැනකින්.';
-        const DEFAULT_OG_TITLE = 'Piuma News';
+        const DEFAULT_OG_TITLE = 'newssrilanka24.com.lk';
         const DEFAULT_OG_DESC = 'සැබෑ කාලීන සිංහල පුවත් සාරාංශ.';
-        const DEFAULT_OG_IMAGE = 'https://yourdomain.com/logo.png';
-        const DEFAULT_OG_URL = 'https://yourdomain.com/';
-        const DEFAULT_TWITTER_TITLE = 'Piuma News';
+        const DEFAULT_OG_IMAGE = 'https://newssrilanka24.com.lk/logo.png';
+        const DEFAULT_OG_URL = 'https://newssrilanka24.com.lk/';
+        const DEFAULT_TWITTER_TITLE = 'newssrilanka24.com.lk';
         const DEFAULT_TWITTER_DESC = 'සිංහල පුවත් එකතුව.';
-        const DEFAULT_TWITTER_IMAGE = 'https://yourdomain.com/logo.png';
+        const DEFAULT_TWITTER_IMAGE = 'https://newssrilanka24.com.lk/logo.png';
+        const SITE_NAME = 'newssrilanka24.com.lk';
+
+        function formatThumb(url, size) {
+            if (!url) return 'https://via.placeholder.com/800x400?text=News';
+            if (url.indexOf('s72') !== -1) return url.replace('s72', size);
+            return url;
+        }
 
         // --- Dark Mode ---
         const darkToggle = document.getElementById('darkModeToggle');
@@ -443,7 +490,7 @@
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
 
-        // ==================== බහු RSS පූරණය ====================
+        // ==================== බහු RSS පූරණය (preserved) ====================
         async function fetchAllFeeds() {
             let allItems = [];
             for (let feedUrl of RSS_FEEDS) {
@@ -463,48 +510,96 @@
         }
 
         async function fetchNews() {
+            let rssArticles = [];
+            let firebaseArticles = [];
+
+            // RSS fail වුණොත් Firebase news පෙන්වයි.
             try {
-                const items = await fetchAllFeeds();
-                allArticles = items.map(item => ({
-                    title: item.title,
-                    link: item.link,
-                    description: item.description ? item.description.replace(/<[^>]*>/g, '') : '',
-                    thumbnail: item.thumbnail || 'https://via.placeholder.com/800x400?text=News',
-                    pubDate: item.pubDate,
-                    category: detectCategory(item.title + ' ' + (item.description || ''))
-                }));
-                allArticles.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
-                filteredArticles = [...allArticles];
-                renderSlider();
-                renderNewsGrid();
-                renderBreakingTicker();
-                handleHash();
-            } catch(err) {
-                console.error(err);
-                document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">පුවත් ලබාගැනීම අසාර්ථකයි.</div>';
+                rssArticles = await fetchAllFeeds();
+            } catch(e) {
+                console.warn('RSS feeds failed:', e);
             }
+
+            // Firebase fail වුණොත් RSS news පෙන්වයි.
+            // Dynamic import නිසා Firebase SDK CDN එක fail වුණත් RSS system එකට බලපාන්නේ නැහැ.
+            try {
+                const fbModule = await import('./firebase-news.js');
+                firebaseArticles = await fbModule.fetchFirebaseNews();
+            } catch(e) {
+                console.warn('Firebase news failed:', e);
+            }
+
+            const rssMapped = rssArticles.map(item => ({
+                title: item.title,
+                link: item.link,
+                description: item.description ? item.description.replace(/<[^>]*>/g, '') : '',
+                thumbnail: item.thumbnail || 'https://via.placeholder.com/800x400?text=News',
+                pubDate: item.pubDate,
+                category: detectCategory(item.title + ' ' + (item.description || '')),
+                language: 'si',
+                source: 'rss',
+                content: item.content || ''
+            }));
+
+            allArticles = [...firebaseArticles, ...rssMapped];
+
+            if (allArticles.length === 0) {
+                document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">පුවත් ලබාගැනීම අසාර්ථකයි.</div>';
+                return;
+            }
+
+            allArticles.sort((a, b) => {
+                return new Date(b.pubDate) - new Date(a.pubDate);
+            });
+            filteredArticles = [...allArticles];
+            renderSlider();
+            renderNewsGrid();
+            renderBreakingTicker();
+            handleHash();
         }
 
         function detectCategory(text) {
-            const lower = text.toLowerCase();
-            if(lower.includes('ටෙක්') || lower.includes('තාක්ෂණ')) return 'technology';
-            if(lower.includes('ක්‍රීඩා') || lower.includes('තරග')) return 'sports';
-            if(lower.includes('ව්‍යාපාර') || lower.includes('ආර්ථික')) return 'business';
-            if(lower.includes('ලෝක') || lower.includes('විදෙස්')) return 'world';
+            const lower = String(text || '').toLowerCase();
+            if(lower.includes('ටෙක්') || lower.includes('තාක්ෂණ') || lower.includes('technology') || lower.includes('smartphone') || lower.includes('phone') || lower.includes('app')) return 'technology';
+            if(lower.includes('ක්‍රීඩා') || lower.includes('තරග') || lower.includes('sports') || lower.includes('cricket')) return 'sports';
+            if(lower.includes('ව්‍යාපාර') || lower.includes('ආර්ථික') || lower.includes('business') || lower.includes('economy') || lower.includes('market')) return 'business';
+            if(lower.includes('ලෝක') || lower.includes('විදෙස්') || lower.includes('world') || lower.includes('international')) return 'world';
+            if(lower.includes('සිනමා') || lower.includes('රංගන') || lower.includes('ගායන') || lower.includes('entertainment') || lower.includes('film')) return 'entertainment';
+            if(lower.includes('අධ්‍යාපන') || lower.includes('පාසල්') || lower.includes('විශ්වවිද්‍යාල') || lower.includes('education')) return 'education';
+            if(lower.includes('සෞඛ්‍ය') || lower.includes('රෝග') || lower.includes('health') || lower.includes('hospital')) return 'health';
+            if(lower.includes('ශ්‍රී ලංකා') || lower.includes('ශ්‍රී ලංකාව') || lower.includes('sri lanka')) return 'sri-lanka';
             return 'general';
         }
 
         function renderSlider() {
-            const top5 = allArticles.slice(0,5);
+            const featured = allArticles.filter(a => a.isFeatured);
+            const topItems = [];
+            const seen = new Set();
+            for (const a of [...featured, ...allArticles]) {
+                if (!seen.has(a.link)) {
+                    seen.add(a.link);
+                    topItems.push(a);
+                }
+                if (topItems.length >= 5) break;
+            }
             let html = '';
-            top5.forEach((item, idx) => {
-                let img = item.thumbnail.replace('s72', 's1200');
+            topItems.forEach((item, idx) => {
                 html += `<div class="slide" style="display:${idx===0?'block':'none'}">
-                            <img src="${img}" alt="slide">
+                            <img src="${formatThumb(item.thumbnail, 's1200')}" alt="slide" loading="lazy">
                             <div class="slide-caption">${item.title}</div>
                         </div>`;
             });
-            document.getElementById('sliderContainer').innerHTML = html;
+            const container = document.getElementById('sliderContainer');
+            container.innerHTML = html;
+            container.querySelectorAll('.slide').forEach((el, i) => {
+                if (!topItems[i]) return;
+                el.style.cursor = 'pointer';
+                el.addEventListener('click', () => {
+                    const article = topItems[i];
+                    window.location.hash = 'article=' + encodeURIComponent(article.link);
+                    openModal(article);
+                });
+            });
             startSlider();
         }
 
@@ -520,38 +615,55 @@
         }
 
         function renderBreakingTicker() {
-            let ticker = allArticles.slice(0,10).map(a => a.title).join(' • ');
-            document.getElementById('breakingMarquee').innerHTML = ticker;
+            const breakingItems = allArticles.filter(a => a.isBreaking);
+            const tickerItems = [];
+            const seen = new Set();
+            for (const a of [...breakingItems, ...allArticles]) {
+                if (!seen.has(a.link)) {
+                    seen.add(a.link);
+                    tickerItems.push(a);
+                }
+                if (tickerItems.length >= 15) break;
+            }
+            document.getElementById('breakingMarquee').innerHTML = tickerItems.map(a => a.title).join(' • ');
         }
 
         async function renderNewsGrid() {
             let articlesToShow = filteredArticles;
             if(currentCategory !== 'all') articlesToShow = filteredArticles.filter(a => a.category === currentCategory);
+            if(currentLanguage !== 'all') articlesToShow = articlesToShow.filter(a => (a.language || 'si') === currentLanguage);
             if(searchTerm) {
-                articlesToShow = articlesToShow.filter(a => 
-                    a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    a.description.toLowerCase().includes(searchTerm.toLowerCase())
-                );
+                articlesToShow = articlesToShow.filter(a => {
+                    const haystack = ((a.title || '') + ' ' + (a.description || '') + ' ' + (a.content || '') + ' ' + (a.category || '')).toLowerCase();
+                    return haystack.includes(searchTerm.toLowerCase());
+                });
             }
 
             const grid = document.getElementById('newsGrid');
             grid.innerHTML = '';
 
+            if (articlesToShow.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; padding:40px;">පුවත් හමු නොවීය.</div>';
+                return;
+            }
+
             for(let article of articlesToShow) {
                 const card = document.createElement('div');
                 card.className = 'news-card';
-                const imgUrl = article.thumbnail.replace('s72', 's600');
-                const date = new Date(article.pubDate).toLocaleDateString('si-LK');
+                const imgUrl = formatThumb(article.thumbnail, 's600');
+                const date = article.pubDate ? new Date(article.pubDate).toLocaleDateString('si-LK') : '';
+                const catLabel = CATEGORY_LABELS[article.category] || article.category || '';
 
                 card.innerHTML = `
-                    <img src="${imgUrl}" loading="lazy">
+                    <img src="${imgUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/800x400?text=News'">
                     <div class="card-content">
                         <div class="card-title">${article.title}</div>
                         <div class="card-meta">
                             <span><i class="far fa-calendar"></i> ${date}</span>
+                            ${catLabel ? `<span style="margin-left:10px;"><i class="fas fa-tag"></i> ${catLabel}</span>` : ''}
                         </div>
                         <div class="summary-preview" style="margin-top:12px; color:#64748b; font-size:0.85rem;">
-                            ${article.description.substring(0, 150)}...
+                            ${(article.description || '').substring(0, 150)}...
                         </div>
                     </div>
                 `;
@@ -607,21 +719,22 @@
         }
 
         // --- Article Structured Data ---
-        function addArticleStructuredData(article) {
+        function addArticleStructuredData(article, shareUrl) {
             removeArticleStructuredData();
             const ldJson = {
                 "@context": "https://schema.org",
                 "@type": "NewsArticle",
                 "headline": article.title,
                 "description": article.description,
-                "image": article.thumbnail.replace('s72','s800'),
+                "image": formatThumb(article.thumbnail, 's800'),
                 "datePublished": article.pubDate,
-                "url": window.location.href,
-                "author": { "@type": "Organization", "name": "Piuma News" },
+                "dateModified": article.pubDate,
+                "url": shareUrl || window.location.href,
+                "author": { "@type": "Organization", "name": article.author || "News Sri Lanka 24" },
                 "publisher": {
                     "@type": "Organization",
-                    "name": "Piuma News",
-                    "logo": { "@type": "ImageObject", "url": "https://yourdomain.com/logo.png" }
+                    "name": "News Sri Lanka 24",
+                    "logo": { "@type": "ImageObject", "url": "https://newssrilanka24.com.lk/logo.png" }
                 }
             };
             const script = document.createElement('script');
@@ -638,7 +751,7 @@
 
         // ==================== AI සාරාංශය (Pollinations.ai) ====================
         async function getAISummary(text, callback) {
-            const shortText = text.substring(0, 800);
+            const shortText = String(text || '').substring(0, 800);
             const prompt = `කෙටියෙන් සිංහලෙන් සාරාංශ කරන්න: ${shortText}`;
             const url = 'https://text.pollinations.ai/' + encodeURIComponent(prompt);
             try {
@@ -659,15 +772,34 @@
             const modal = document.getElementById('newsModal');
             const modalBody = document.getElementById('modalBody');
 
-            const shareUrl = article.link;
+            const isManual = article.source === 'manual';
+            const baseUrl = window.location.href.split('#')[0];
+            const shareUrl = isManual ? baseUrl + '#article=' + encodeURIComponent(article.link) : article.link;
             const shareTitle = article.title;
             const encodedUrl = encodeURIComponent(shareUrl);
             const encodedTitle = encodeURIComponent(shareTitle);
+            const date = article.pubDate ? new Date(article.pubDate).toLocaleDateString('si-LK', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+            const catLabel = CATEGORY_LABELS[article.category] || article.category || 'සාමාන්‍ය';
+            const author = article.author || 'News Sri Lanka 24';
+
+            const externalBtn = isManual ? '' : `
+                <div class="modal-buttons" style="margin-top:20px;">
+                    <a href="${article.link}" target="_blank" style="background:var(--primary); color:white; padding:12px 24px; border-radius:40px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-external-link-alt"></i> මුල් පුවත කියවන්න
+                    </a>
+                </div>
+            `;
 
             modalBody.innerHTML = `
                 <h2 style="color:var(--primary); margin-bottom:15px;">${shareTitle}</h2>
-                <img src="${article.thumbnail.replace('s72','s800')}" style="width:100%; border-radius:20px; margin:15px 0;" onerror="this.src='https://via.placeholder.com/800x400'">
-                <p><strong>විස්තරය:</strong><br>${article.description}</p>
+                <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:5px;">
+                    <span class="cat-tag">${catLabel}</span>
+                    <span class="card-meta"><i class="far fa-user"></i> ${author}</span>
+                    <span class="card-meta"><i class="far fa-calendar"></i> ${date}</span>
+                </div>
+                <img src="${formatThumb(article.thumbnail, 's800')}" style="width:100%; border-radius:20px; margin:15px 0;" onerror="this.src='https://via.placeholder.com/800x400?text=News'">
+                ${article.description ? `<p><strong>විස්තරය:</strong><br>${article.description}</p>` : ''}
+                ${isManual && article.content ? `<div class="full-content"><strong>සම්පූර්ණ පුවත:</strong><br>${article.content}</div>` : ''}
                 
                 <!-- AI සාරාංශ බොත්තම -->
                 <div style="margin-top:15px;">
@@ -686,11 +818,7 @@
                     <button class="share-btn" id="shareCopy"><i class="fas fa-copy"></i> Copy Link</button>
                 </div>
 
-                <div class="modal-buttons" style="margin-top:20px;">
-                    <a href="${article.link}" target="_blank" style="background:var(--primary); color:white; padding:12px 24px; border-radius:40px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
-                        <i class="fas fa-external-link-alt"></i> මුල් පුවත කියවන්න
-                    </a>
-                </div>
+                ${externalBtn}
             `;
             modal.style.display = 'flex';
 
@@ -713,7 +841,8 @@
                 const btn = this;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> සාරාංශනය වෙමින්...';
-                getAISummary(article.description, (summary) => {
+                const summaryInput = article.content || article.description || '';
+                getAISummary(summaryInput, (summary) => {
                     document.getElementById('aiSummaryContainer').innerHTML = `
                         <div class="ai-summary-box">
                             <strong>🤖 AI සාරාංශය:</strong>
@@ -726,16 +855,16 @@
             });
 
             // --- Meta Update (SEO) ---
-            document.title = article.title + ' | Piuma News';
-            setMeta('description', article.description.substring(0, 160));
+            document.title = article.title + ' | ' + SITE_NAME;
+            setMeta('description', (article.description || '').substring(0, 160));
             setMeta('og:title', article.title);
-            setMeta('og:description', article.description.substring(0, 200));
-            setMeta('og:image', article.thumbnail.replace('s72','s800'));
-            setMeta('og:url', window.location.href);
+            setMeta('og:description', (article.description || '').substring(0, 200));
+            setMeta('og:image', formatThumb(article.thumbnail, 's800'));
+            setMeta('og:url', shareUrl);
             setMeta('twitter:title', article.title);
-            setMeta('twitter:description', article.description.substring(0, 200));
-            setMeta('twitter:image', article.thumbnail.replace('s72','s800'));
-            addArticleStructuredData(article);
+            setMeta('twitter:description', (article.description || '').substring(0, 200));
+            setMeta('twitter:image', formatThumb(article.thumbnail, 's800'));
+            addArticleStructuredData(article, shareUrl);
         }
 
         // --- Filters ---
@@ -756,6 +885,14 @@
                 document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentCategory = btn.getAttribute('data-cat');
+                applyFilters();
+            });
+        });
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLanguage = btn.getAttribute('data-lang');
                 applyFilters();
             });
         });
