@@ -2,11 +2,31 @@ import { supabase } from "./supabase-config.js";
 
 const PLACEHOLDER_IMG = "https://via.placeholder.com/800x400?text=News";
 
+export function hashCode(str) {
+  let h = 0;
+  for (let i = 0; i < String(str).length; i++) {
+    h = ((h << 5) - h + String(str).charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+export function generateArticleSlug(title, salt) {
+  const base = String(title || "news")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0D80-\u0DFF]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  const h = hashCode(String(salt || "")).toString(36).slice(0, 5);
+  return (base || "news") + "-" + h;
+}
+
 function toArticleObject(row) {
+  const slug = row.slug || generateArticleSlug(row.title, row.id);
   return {
     id: row.id,
     title: row.title || "Untitled",
-    link: "#supabase-" + row.id,
+    slug: slug,
+    link: "/article/" + slug,
     description: row.short_description || "",
     content: row.content || "",
     thumbnail: row.image_url || PLACEHOLDER_IMG,

@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
   <url>
     <loc>https://newssrilanka24.com.lk/</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
   </url>
-
 </urlset>
+<!--
+  This is a static fallback sitemap.
+  For a dynamic sitemap that includes all published articles, deploy the
+  Supabase Edge Function in supabase/functions/sitemap/index.ts.
+
+  Then update this file (or your hosting config) to point to:
+    https://jwjqhzrdrvqxwcahxmmb.supabase.co/functions/v1/sitemap
+
+  Or set up a cron/redirect on your hosting to proxy the Edge Function.
+-->

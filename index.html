@@ -488,6 +488,13 @@
             return (base || 'news') + '-' + hash;
         }
 
+        function getArticleSlug(article) {
+            if (article && article.slug) return article.slug;
+            const title = (article && article.title) || 'news';
+            const salt = (article && (article.originalLink || article.link)) || title;
+            return makeSlug(title, salt);
+        }
+
         function formatThumb(url, size) {
             if (!url) return 'https://via.placeholder.com/800x400?text=News';
             if (url.indexOf('s72') !== -1) return url.replace('s72', size);
@@ -560,6 +567,12 @@
 
             allArticles = [...supabaseArticles, ...rssMapped];
 
+            // Normalize: every article must carry a valid clean-URL slug.
+            allArticles = allArticles.map(a => {
+                const slug = getArticleSlug(a);
+                return Object.assign({}, a, { slug: slug, link: '/article/' + slug });
+            });
+
             if (allArticles.length === 0) {
                 document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">පුවත් ලබාගැනීම අසාර්ථකයි.</div>';
                 return;
@@ -613,7 +626,8 @@
                 el.style.cursor = 'pointer';
                 el.addEventListener('click', () => {
                     const article = topItems[i];
-                    history.pushState({ slug: article.slug }, '', '/article/' + article.slug);
+                    const slug = getArticleSlug(article);
+                    history.pushState({ slug: slug }, '', '/article/' + slug);
                     openModal(article);
                 });
             });
@@ -685,7 +699,8 @@
                     </div>
                 `;
                 card.addEventListener('click', () => {
-                    history.pushState({ slug: article.slug }, '', '/article/' + article.slug);
+                    const slug = getArticleSlug(article);
+                    history.pushState({ slug: slug }, '', '/article/' + slug);
                     openModal(article);
                 });
                 grid.appendChild(card);
@@ -823,7 +838,8 @@
 
             const isManual = article.source === 'manual';
             const SITE = 'https://newssrilanka24.com.lk';
-            const shareUrl = article.slug ? SITE + '/article/' + article.slug : (isManual ? SITE + '/' : article.link);
+            const articleSlug = getArticleSlug(article);
+            const shareUrl = articleSlug ? SITE + '/article/' + articleSlug : (isManual ? SITE + '/' : article.link);
             const shareTitle = article.title;
             const encodedUrl = encodeURIComponent(shareUrl);
             const encodedTitle = encodeURIComponent(shareTitle);
@@ -904,7 +920,7 @@
             });
 
             // --- Meta Update (SEO) ---
-            const articleUrl = SITE + '/article/' + article.slug;
+            const articleUrl = SITE + '/article/' + articleSlug;
             document.title = article.title + ' | ' + SITE_NAME;
             setMeta('description', (article.description || '').substring(0, 160));
             setMeta('og:title', article.title);

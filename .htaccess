@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Serve existing files/dirs as-is
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# /article/{slug} → index.html (SPA routing)
+RewriteRule ^article/(.+)$ /index.html [L]

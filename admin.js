@@ -308,17 +308,19 @@ async function saveNews(statusOverride) {
     is_breaking:       $("newsBreaking").checked,
     is_featured:       $("newsFeatured").checked,
     status:            statusOverride || $("newsStatus").value,
-    slug:              generateSlug(title),
     image_url:         uploadedImageUrl || ""
   };
 
   let result;
   if (editingDocId) {
     if (pubDate) payload.published_at = pubDate;
+    // Preserve existing slug — don't break URLs
+    payload.slug = newsCache[editingDocId]?.slug || generateSlug(title);
     result = await supabase.from("news").update(payload).eq("id", editingDocId);
   } else {
     payload.published_at = pubDate || new Date().toISOString();
     payload.source = "manual";
+    payload.slug = generateSlug(title);
     result = await supabase.from("news").insert(payload);
   }
 
