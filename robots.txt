@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://newssrilanka24.com.lk/sitemap.xml
