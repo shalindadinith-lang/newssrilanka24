@@ -1,0 +1,9 @@
+{
+  "name": "newssrilanka24-hosting",
+  "version": "1.0.0",
+  "private": true,
+  "description": "newssrilanka24.com.lk static site for GitHub Pages with build-time article pre-rendering",
+  "scripts": {
+    "build": "node build-static.js"
+  }
+}
