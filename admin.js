@@ -65,6 +65,22 @@ function translateError(msg) {
   return msg;
 }
 
+function showSaveStatus(msg, isError) {
+  const el = $("saveStatus");
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.display = "block";
+  el.style.margin = "12px 0 0";
+  el.style.padding = "10px 14px";
+  el.style.borderRadius = "10px";
+  el.style.fontSize = "0.9rem";
+  el.style.border = "1px solid " + (isError ? "#f87171" : "#4ade80");
+  el.style.background = isError ? "#7f1d1d33" : "#14532d33";
+  el.style.color = isError ? "#fca5a5" : "#86efac";
+  clearTimeout(window.__saveStatusTimer);
+  window.__saveStatusTimer = setTimeout(() => { el.style.display = "none"; }, 25000);
+}
+
 function setLoginError(msg) { $("loginError").textContent = msg; }
 
 function showLogin() {
@@ -324,7 +340,20 @@ async function saveNews(statusOverride) {
     result = await supabase.from("news").insert(payload);
   }
 
-  if (result.error) { alert("Save error: " + result.error.message); return; }
+  if (result.error) { showSaveStatus("Save error: " + result.error.message, true); return; }
+
+  const finalSlug = payload.slug || (editingDocId && newsCache[editingDocId] && newsCache[editingDocId].slug) || generateSlug(title);
+  const liveUrl = "https://newssrilanka24.com.lk/article/" + finalSlug + "/";
+  const liveStatus = (statusOverride || payload.status) === "published";
+  showSaveStatus(
+    (liveStatus ? "Article published." : "Draft saved.") +
+    (liveStatus
+      ? ' Live URL: <a href="' + liveUrl + '" target="_blank" rel="noopener">' + liveUrl + "</a><br>" +
+        "<small>Static page එක GitHub Actions මඟින් (උපරිම මිනිත්තු 5කින්) ස්වයංක්‍රීයව සෑදේ. ඊට පසු URL එක HTTP 200 සමඟ open වේ.</small>"
+      : ""),
+    false
+  );
+
   resetEditor();
   switchTab("list");
   loadNews();
@@ -367,6 +396,8 @@ function resetEditor() {
   $("imagePreview").style.display = "none"; $("imagePreview").src = "";
   $("uploadError").textContent = ""; $("uploadError").className = "upload-error";
   $("newsImage").value = "";
+  const st = $("saveStatus");
+  if (st) st.style.display = "none";
 }
 
 // ---------------------------------------------------------- Modal ----

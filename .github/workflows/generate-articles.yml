@@ -6,7 +6,9 @@ on:
     paths-ignore: ['article/**', 'sitemap.xml']
   workflow_dispatch:
   schedule:
-    - cron: '0 */12 * * *'
+    # Frequent regeneration so admin-published (Supabase) articles become
+    # static pages within ~5 minutes instead of waiting 12 hours.
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
