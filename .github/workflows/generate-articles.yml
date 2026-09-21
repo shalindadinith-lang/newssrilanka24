@@ -5,9 +5,15 @@ on:
     branches: [main]
     paths-ignore: ['article/**', 'sitemap.xml']
   workflow_dispatch:
+  # Forward-compatible: a secure server-side webhook (e.g. Supabase Edge
+  # Function holding a GitHub PAT) can POST a repository_dispatch event to
+  # trigger an instant rebuild. Requires no code change when wired up.
+  repository_dispatch:
+    types: [generate-articles]
   schedule:
-    # Frequent regeneration so admin-published (Supabase) articles become
-    # static pages within ~5 minutes instead of waiting 12 hours.
+    # Permanent automatic regeneration: any article published in Supabase is
+    # turned into a static /article/{slug}/ page + sitemap entry within ~5
+    # minutes (GitHub's minimum schedule interval) — no manual build needed.
     - cron: '*/5 * * * *'
 
 permissions:

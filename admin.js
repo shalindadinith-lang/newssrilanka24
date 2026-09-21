@@ -1,5 +1,23 @@
 import { supabase } from "./supabase-config.js";
 
+// Server-side trigger (Supabase Edge Function) that asks GitHub to regenerate
+// static article pages immediately after a publish. No secrets live in JS —
+// the function checks the caller is an authenticated admin, then dispatches
+// the build. Fire-and-forget: if it isn't deployed yet, the scheduled
+// workflow still covers regeneration automatically.
+const TRIGGER_FN_URL = "https://jwjqhzrdrvqxwcahxmmb.supabase.co/functions/v1/trigger-articles";
+
+async function triggerInstantRegeneration() {
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+    await fetch(TRIGGER_FN_URL, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + data.session.access_token }
+    });
+  } catch (e) { /* optional trigger — ignore */ }
+}
+
 const CATEGORY_LABELS = {
   general: "General",
   "sri-lanka": "Sri Lanka",
@@ -79,6 +97,43 @@ function showSaveStatus(msg, isError) {
   el.style.color = isError ? "#fca5a5" : "#86efac";
   clearTimeout(window.__saveStatusTimer);
   window.__saveStatusTimer = setTimeout(() => { el.style.display = "none"; }, 25000);
+}
+
+// After publishing, watch the live article URL until the auto-generated
+// static page is available (HTTP 200), then confirm it in the admin panel.
+function pollArticleReadiness(finalSlug) {
+  const url = "https://newssrilanka24.com.lk/article/" + finalSlug + "/";
+  const el = $("saveStatus");
+  if (!el) return;
+  clearTimeout(window.__saveStatusTimer);
+  el.style.display = "block";
+  el.style.margin = "12px 0 0";
+  el.style.padding = "10px 14px";
+  el.style.borderRadius = "10px";
+  el.style.fontSize = "0.9rem";
+  el.style.border = "1px solid #4ade80";
+  el.style.background = "#14532d33";
+  el.style.color = "#86efac";
+  let tries = 0;
+  const update = (html) => { el.innerHTML = html; };
+  update('Static page එක GitHub Actions මඟින් සෑදීමට පටන් ගෙන ඇත. URL එක check වෙමින් පවතී...<br><small><a href="' + url + '" target="_blank" rel="noopener">' + url + "</a></small>");
+  const timer = setInterval(async () => {
+    tries++;
+    try {
+      const res = await fetch(url, { method: "HEAD", cache: "no-store" });
+      if (res.ok) {
+        clearInterval(timer);
+        update('✅ Article page live (HTTP ' + res.status + '): <a href="' + url + '" target="_blank" rel="noopener">' + url + "</a>");
+        window.__saveStatusTimer = setTimeout(() => { el.style.display = "none"; }, 15000);
+        return;
+      }
+    } catch (e) {}
+    if (tries >= 24) {
+      clearInterval(timer);
+      update('Static build සූදානම් වෙමින් පවතී (උපරිම ~5–7 මිනිත්තු). URL: <a href="' + url + '" target="_blank" rel="noopener">' + url + "</a>");
+      window.__saveStatusTimer = setTimeout(() => { el.style.display = "none"; }, 15000);
+    }
+  }, 20000);
 }
 
 function setLoginError(msg) { $("loginError").textContent = msg; }
@@ -345,18 +400,24 @@ async function saveNews(statusOverride) {
   const finalSlug = payload.slug || (editingDocId && newsCache[editingDocId] && newsCache[editingDocId].slug) || generateSlug(title);
   const liveUrl = "https://newssrilanka24.com.lk/article/" + finalSlug + "/";
   const liveStatus = (statusOverride || payload.status) === "published";
-  showSaveStatus(
-    (liveStatus ? "Article published." : "Draft saved.") +
-    (liveStatus
-      ? ' Live URL: <a href="' + liveUrl + '" target="_blank" rel="noopener">' + liveUrl + "</a><br>" +
-        "<small>Static page එක GitHub Actions මඟින් (උපරිම මිනිත්තු 5කින්) ස්වයංක්‍රීයව සෑදේ. ඊට පසු URL එක HTTP 200 සමඟ open වේ.</small>"
-      : ""),
-    false
-  );
 
   resetEditor();
   switchTab("list");
   loadNews();
+
+  showSaveStatus(
+    (liveStatus ? "Article published." : "Draft saved.") +
+    (liveStatus
+      ? ' Live URL: <a href="' + liveUrl + '" target="_blank" rel="noopener">' + liveUrl + "</a><br>" +
+        "<small>Static page එක GitHub Actions මඟින් ස්වයංක්‍රීයව සෑදේ (උපරිම ~5–7 මිනිත්තු). URL එක සූදානම් වූ විට මෙතනින් දැනුම් දෙයි.</small>"
+      : ""),
+    false
+  );
+
+  if (liveStatus) {
+    pollArticleReadiness(finalSlug);
+    triggerInstantRegeneration();
+  }
 }
 
 $("publishBtn").addEventListener("click", () => saveNews("published"));
