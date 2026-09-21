@@ -18,9 +18,18 @@
 
 const fs = require("fs");
 const path = require("path");
+const SEO = require("./seo-config.js");
 
-const SITE = "https://newssrilanka24.com.lk";
+const SITE = SEO.SITE;
 const ROOT = __dirname;
+
+function articleUrl(slug) {
+  return SITE + "/article/" + slug + "/";
+}
+
+function sitemapLoc(slug) {
+  return SITE + "/article/" + encodeURIComponent(slug) + "/";
+}
 
 const PLACEHOLDER_IMG = "https://via.placeholder.com/800x400?text=News";
 
@@ -142,8 +151,8 @@ async function fetchPublishedArticles(supabase) {
 }
 
 // --- Article page template (matches homepage design) --------------------
-function renderArticlePage(row, slug) {
-  const url = SITE + "/article/" + slug;
+function renderArticlePage(row, slug, related) {
+  const url = articleUrl(slug);
   const title = row.title || "Untitled";
   const image = row.image_url || PLACEHOLDER_IMG;
   const desc = stripHtml(row.short_description || printfDescription(row.content) || "").trim();
@@ -160,43 +169,74 @@ function renderArticlePage(row, slug) {
 
   const ldJson = {
     "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    headline: title,
-    description: metaDesc,
-    image: [image],
-    datePublished: dateISO,
-    dateModified: row.updated_at || dateISO,
-    author: { "@type": "Organization", name: author },
-    publisher: {
-      "@type": "Organization",
-      name: "News Sri Lanka 24",
-      logo: { "@type": "ImageObject", url: SITE + "/logo.png" }
-    },
-    url: url,
-    mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    articleSection: catLabel,
-    inLanguage: inLanguage
+    "@graph": [
+      {
+        "@type": "NewsArticle",
+        headline: title,
+        description: metaDesc,
+        image: [image],
+        datePublished: dateISO,
+        dateModified: row.updated_at || dateISO,
+        author: { "@type": "Organization", name: author },
+        publisher: {
+          "@type": "NewsMediaOrganization",
+          name: SEO.SITE_NAME,
+          logo: { "@type": "ImageObject", url: SEO.LOGO_IMAGE, width: 512, height: 512 }
+        },
+        url: url,
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        articleSection: catLabel,
+        inLanguage: inLanguage
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "මුල් පිටුව", item: SITE + "/" },
+          { "@type": "ListItem", position: 2, name: title, item: url }
+        ]
+      }
+    ]
   };
+
+  const relatedHtml = (related || [])
+    .map((item) => {
+      return (
+        '<li><a href="' +
+        esc(articleUrl(item.slug)) +
+        '">' +
+        esc(item.row.title || item.slug) +
+        "</a></li>"
+      );
+    })
+    .join("");
 
   const head = `<!DOCTYPE html>
 <html lang="${inLanguage}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>${esc(title)} | newssrilanka24.com.lk</title>
+<title>${esc(title)} | ${esc(SEO.SITE_NAME)}</title>
 <meta name="description" content="${esc(metaDesc)}">
+<meta name="robots" content="index, follow">
 <link rel="canonical" href="${esc(url)}">
-<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/logo.png">
+<link rel="sitemap" type="application/xml" href="${SITE}/sitemap.xml">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(metaDesc)}">
 <meta property="og:image" content="${esc(image)}">
 <meta property="og:url" content="${esc(url)}">
 <meta property="og:type" content="article">
+<meta property="og:locale" content="${inLanguage === "en" ? "en_GB" : "si_LK"}">
+<meta property="og:site_name" content="${esc(SEO.SITE_NAME)}">
+<meta property="article:published_time" content="${esc(dateISO || "")}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(metaDesc)}">
 <meta name="twitter:image" content="${esc(image)}">
 <script type="application/ld+json">${JSON.stringify(ldJson)}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
@@ -242,9 +282,13 @@ body {
   align-items: center;
   gap: 15px;
 }
-.logo { color: white; text-decoration: none; }
-.logo h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-.logo a { color: white; text-decoration: none; }
+.logo { color: white; text-decoration: none; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.related { margin-top: 28px; }
+.related h2 { font-size: 1.15rem; margin-bottom: 10px; }
+.related ul { padding-left: 18px; line-height: 1.8; }
+.related a { color: var(--primary); }
+.crumb { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; }
+.crumb a { color: var(--primary); text-decoration: none; }
 .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .dark-toggle {
   background: rgba(255,255,255,0.2);
@@ -347,7 +391,7 @@ footer {
 
   const body = `<div class="top-bar">
   <div class="top-container">
-    <a class="logo" href="https://newssrilanka24.com.lk/"><h1><i class="fas fa-newspaper"></i> newssrilanka24.com.lk</h1></a>
+    <a class="logo" href="${SITE}/"><i class="fas fa-newspaper"></i> newssrilanka24.com.lk</a>
     <div class="controls">
       <button class="dark-toggle" id="darkModeToggle"><i class="fas fa-moon"></i> අඳුරු</button>
     </div>
@@ -358,16 +402,19 @@ footer {
 
 <div class="article-wrap">
   <div class="article-card">
+    <nav class="crumb" aria-label="breadcrumb"><a href="${SITE}/">මුල් පිටුව</a> / ${esc(catLabel)}</nav>
     <span class="cat-tag">${esc(catLabel)}</span>
     <h1 class="article-title">${esc(title)}</h1>
     <div class="card-meta">
       <i class="far fa-user"></i> ${esc(author)} &nbsp;&nbsp; <i class="far fa-calendar"></i> ${esc(dateHuman)}
     </div>
-    <img class="article-img" src="${esc(image)}" alt="${esc(title)}" loading="eager" onerror="this.src='${PLACEHOLDER_IMG}'">
+    <img class="article-img" src="${esc(image)}" alt="${esc(title)}" width="860" height="460" loading="eager" fetchpriority="high" onerror="this.src='${PLACEHOLDER_IMG}'">
     ${desc ? `<p class="article-desc">${esc(desc)}</p>` : ""}
     ${contentHtml ? `<div class="full-content">${contentHtml}</div>` : ""}
 
-    <a class="back-home" href="https://newssrilanka24.com.lk/"><i class="fas fa-home"></i> සියලුම පුවත්</a>
+    ${relatedHtml ? `<div class="related"><h2>තවත් පුවත්</h2><ul>${relatedHtml}</ul></div>` : ""}
+
+    <a class="back-home" href="${SITE}/"><i class="fas fa-home"></i> සියලුම පුවත්</a>
 
     <div class="share-buttons">
       <a class="share-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${shareText}%20${shareUrl}"><i class="fab fa-whatsapp"></i> WhatsApp</a>
@@ -420,11 +467,11 @@ function renderSitemap(articles, generatedAt) {
       "  </url>"
   );
   for (const a of articles) {
-    const lastmod = (a.updated_at || a.published_at || "").split("T")[0] || generatedAt;
-    const priority = (a.category || "general") === "sri-lanka" ? "0.9" : "0.8";
+    const lastmod = (a.row.updated_at || a.row.published_at || "").split("T")[0] || generatedAt;
+    const priority = (a.row.category || "general") === "sri-lanka" ? "0.9" : "0.8";
     rows.push(
       "  <url>\n" +
-        "    <loc>" + escXml(SITE + "/article/" + a.slug) + "</loc>\n" +
+        "    <loc>" + escXml(articleUrl(a.slug)) + "</loc>\n" +
         "    <lastmod>" + escXml(lastmod) + "</lastmod>\n" +
         "    <changefreq>weekly</changefreq>\n" +
         "    <priority>" + priority + "</priority>\n" +

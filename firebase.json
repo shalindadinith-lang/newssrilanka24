@@ -1,7 +1,42 @@
 {
   "hosting": {
-    "rewrites": [
-      { "source": "/article/**", "destination": "/index.html" }
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "/admin.html",
+        "headers": [
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
+      },
+      {
+        "source": "/admin.js",
+        "headers": [
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
+      },
+      {
+        "source": "/admin.css",
+        "headers": [
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
+      },
+      {
+        "source": "/robots.txt",
+        "headers": [
+          { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
+        ]
+      },
+      {
+        "source": "/sitemap.xml",
+        "headers": [
+          { "key": "Content-Type", "value": "application/xml; charset=utf-8" }
+        ]
+      }
     ]
   }
 }

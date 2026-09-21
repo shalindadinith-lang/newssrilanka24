@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /admin.js
+Disallow: /admin.css
 
 Sitemap: https://newssrilanka24.com.lk/sitemap.xml

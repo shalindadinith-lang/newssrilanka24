@@ -1,9 +1,16 @@
 RewriteEngine On
+ErrorDocument 404 /404.html
 
-# Serve existing files/dirs as-is
+# www → apex
+RewriteCond %{HTTP_HOST} ^www\.newssrilanka24\.com\.lk$ [NC]
+RewriteRule ^ https://newssrilanka24.com.lk%{REQUEST_URI} [L,R=301]
+
+# HTTP → HTTPS (production host only)
+RewriteCond %{HTTP_HOST} ^newssrilanka24\.com\.lk$ [NC]
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://newssrilanka24.com.lk%{REQUEST_URI} [L,R=301]
+
+# Existing files and directories (including /article/{slug}/index.html) are served as-is.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# /article/{slug} → index.html (SPA routing)
-RewriteRule ^article/(.+)$ /index.html [L]

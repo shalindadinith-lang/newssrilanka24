@@ -1,1 +1,3 @@
-/article/*  /index.html  200
+# Netlify: do not rewrite /article/* to index.html.
+# Missing article URLs must return HTTP 404 (see 404.html).
+# Existing article/{slug}/index.html files are served as 200 automatically.

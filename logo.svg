@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="News Sri Lanka 24">
+  <rect width="512" height="512" rx="64" fill="#c40000"/>
+  <rect x="96" y="120" width="320" height="272" rx="24" fill="#ffffff"/>
+  <rect x="128" y="160" width="160" height="24" rx="8" fill="#c40000"/>
+  <rect x="128" y="208" width="256" height="16" rx="6" fill="#94a3b8"/>
+  <rect x="128" y="240" width="220" height="16" rx="6" fill="#94a3b8"/>
+  <rect x="128" y="272" width="256" height="16" rx="6" fill="#94a3b8"/>
+  <rect x="128" y="304" width="180" height="16" rx="6" fill="#94a3b8"/>
+  <text x="256" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#ffffff">NS24</text>
+</svg>
