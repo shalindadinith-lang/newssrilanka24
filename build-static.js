@@ -45,6 +45,43 @@ const CATEGORY_LABELS = {
   health: "සෞඛ්‍ය"
 };
 
+// Same feed list as index.html (RSS articles become normal article pages).
+const RSS_FEEDS = [
+  "https://api.rss2json.com/v1/api.json?rss_url=https://www.lankacnews.com/feeds/posts/default?alt=rss"
+];
+
+function detectCategory(text) {
+  const lower = String(text || "").toLowerCase();
+  if (lower.includes("ටෙක්") || lower.includes("තාක්ෂණ") || lower.includes("technology") || lower.includes("smartphone") || lower.includes("phone") || lower.includes("app")) return "technology";
+  if (lower.includes("ක්‍රීඩා") || lower.includes("තරග") || lower.includes("sports") || lower.includes("cricket")) return "sports";
+  if (lower.includes("ව්‍යාපාර") || lower.includes("ආර්ථික") || lower.includes("business") || lower.includes("economy") || lower.includes("market")) return "business";
+  if (lower.includes("ලෝක") || lower.includes("විදෙස්") || lower.includes("world") || lower.includes("international")) return "world";
+  if (lower.includes("සිනමා") || lower.includes("රංගන") || lower.includes("ගායන") || lower.includes("entertainment") || lower.includes("film")) return "entertainment";
+  if (lower.includes("අධ්‍යාපන") || lower.includes("පාසල්") || lower.includes("විශ්වවිද්‍යාල") || lower.includes("education")) return "education";
+  if (lower.includes("සෞඛ්‍ය") || lower.includes("රෝග") || lower.includes("health") || lower.includes("hospital")) return "health";
+  if (lower.includes("ශ්‍රී ලංකා") || lower.includes("ශ්‍රී ලංකාව") || lower.includes("sri lanka")) return "sri-lanka";
+  return "general";
+}
+
+function normKey(str) {
+  return String(str || "").toLowerCase().replace(/[^a-z0-9\u0D80-\u0DFF]+/g, "");
+}
+
+function parseDateISO(value) {
+  if (!value) return new Date().toISOString();
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+
+function cleanAuthor(value) {
+  const cleaned = String(value || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\([^)]*\)/g, "")
+    .trim();
+  // Drop email/feed tech addresses like "noreply@blogger.com".
+  return /@/.test(cleaned) ? "" : cleaned;
+}
+
 // --- Slug generation (MUST stay identical to supabase-news.js) ----------
 function hashCode(str) {
   let h = 0;
@@ -150,6 +187,58 @@ async function fetchPublishedArticles(supabase) {
   return Array.isArray(data) ? data : [];
 }
 
+// Fetch RSS feed items (same source as the homepage) and map them into the
+// same article shape as Supabase rows so they render as normal article pages.
+async function fetchRssItems() {
+  let allItems = [];
+  for (const feedUrl of RSS_FEEDS) {
+    try {
+      const response = await fetch(feedUrl);
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const data = await response.json();
+      if (data && Array.isArray(data.items)) allItems = allItems.concat(data.items);
+    } catch (e) {
+      console.warn("RSS feed failed (" + feedUrl + "): " + e.message);
+    }
+  }
+  const unique = new Map();
+  allItems.forEach((item) => {
+    if (item && item.link && !unique.has(item.link)) unique.set(item.link, item);
+  });
+  return Array.from(unique.values());
+}
+
+function rssItemToRow(item) {
+  const link = item.link || "";
+  const rawTitle = item.title || "";
+  const title = String(rawTitle).trim() || "Untitled";
+  const description = stripHtml(item.description || "").replace(/\s+/g, " ").trim();
+  const content = item.content || item.description || "";
+  const image = item.thumbnail || (item.enclosure && item.enclosure.link) || PLACEHOLDER_IMG;
+  const published = parseDateISO(item.pubDate);
+  const author = cleanAuthor(item.author) || "News Sri Lanka 24";
+  return {
+    id: "rss-" + hashCode(link).toString(36),
+    title: title,
+    short_description: description,
+    content: content,
+    image_url: image,
+    category: detectCategory(title + " " + description),
+    language: "si",
+    author: author,
+    published_at: published,
+    updated_at: published,
+    status: "published",
+    is_breaking: false,
+    is_featured: false,
+    source: "rss",
+    originalLink: link,
+    // Same slug algorithm + salt (title, link) as the homepage so the clean
+    // URL is identical whether opened in the SPA or as the static page.
+    slug: generateArticleSlug(rawTitle, link)
+  };
+}
+
 // --- Article page template (matches homepage design) --------------------
 function renderArticlePage(row, slug, related) {
   const url = articleUrl(slug);
@@ -166,6 +255,10 @@ function renderArticlePage(row, slug, related) {
   const contentHtml = row.content || "";
   const shareText = encodeURIComponent(title);
   const shareUrl = encodeURIComponent(url);
+  const sourceLink =
+    row.source === "rss" && row.originalLink
+      ? `<a class="source-link" href="${esc(row.originalLink)}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> මුල් පුවත කියවන්න</a>`
+      : "";
 
   const ldJson = {
     "@context": "https://schema.org",
@@ -353,6 +446,20 @@ body {
   margin-top: 24px;
 }
 .back-home:hover { opacity: 0.9; }
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-right: 10px;
+}
+.source-link:hover { opacity: 0.9; }
 .share-buttons {
   display: flex;
   gap: 10px;
@@ -414,7 +521,10 @@ footer {
 
     ${relatedHtml ? `<div class="related"><h2>තවත් පුවත්</h2><ul>${relatedHtml}</ul></div>` : ""}
 
-    <a class="back-home" href="${SITE}/"><i class="fas fa-home"></i> සියලුම පුවත්</a>
+    <div>
+      ${sourceLink}
+      <a class="back-home" href="${SITE}/"><i class="fas fa-home"></i> සියලුම පුවත්</a>
+    </div>
 
     <div class="share-buttons">
       <a class="share-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${shareText}%20${shareUrl}"><i class="fab fa-whatsapp"></i> WhatsApp</a>
@@ -503,6 +613,28 @@ async function main() {
     slug: articleSlug(row),
     row: row
   }));
+
+  // RSS-fed articles are rendered as normal article pages too, de-duplicated
+  // against Supabase articles (by slug and by normalized title).
+  const seenSlugs = new Set(articles.map((a) => a.slug));
+  const seenTitles = new Set(articles.map((a) => normKey(a.row.title)));
+  let rssItems = [];
+  try {
+    rssItems = await fetchRssItems();
+  } catch (e) {
+    console.warn("RSS fetch skipped: " + e.message);
+  }
+  for (const item of rssItems) {
+    const row = rssItemToRow(item);
+    if (!row.originalLink) continue;
+    if (seenSlugs.has(row.slug)) continue;
+    const titleKey = normKey(row.title);
+    if (seenTitles.has(titleKey)) continue;
+    seenSlugs.add(row.slug);
+    seenTitles.add(titleKey);
+    articles.push({ slug: row.slug, row: row });
+  }
+  console.log("RSS articles fetched:", rssItems.length, "| total pages:", articles.length);
 
   let written = 0;
   for (const a of articles) {

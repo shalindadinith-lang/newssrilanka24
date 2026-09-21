@@ -545,8 +545,12 @@
         }
 
         function getArticleHref(article) {
-            if (article && article.source === 'rss' && article.originalLink) return article.originalLink;
+            // RSS articles are shown as normal on-site article pages too.
             return getArticlePath(article);
+        }
+
+        function normTitle(str) {
+            return String(str || '').toLowerCase().replace(/[^a-z0-9\u0D80-\u0DFF]+/g, '');
         }
 
         function formatThumb(url, size) {
@@ -619,7 +623,17 @@
                 };
             });
 
-            allArticles = [...supabaseArticles, ...rssMapped];
+            // De-duplicate: an RSS item must not duplicate a Supabase article.
+            const seenSlugs = new Set(supabaseArticles.map(a => getArticleSlug(a)));
+            const seenTitles = new Set(supabaseArticles.map(a => normTitle(a.title)));
+            const rssFiltered = rssMapped.filter(a => {
+                if (seenSlugs.has(a.slug) || seenTitles.has(normTitle(a.title))) return false;
+                seenSlugs.add(a.slug);
+                seenTitles.add(normTitle(a.title));
+                return true;
+            });
+
+            allArticles = [...supabaseArticles, ...rssFiltered];
 
             // Normalize: every article must carry a valid clean-URL slug.
             allArticles = allArticles.map(a => {
@@ -680,7 +694,6 @@
                 if (!topItems[i]) return;
                 el.addEventListener('click', (e) => {
                     const article = topItems[i];
-                    if (article.source === 'rss') return;
                     e.preventDefault();
                     const slug = getArticleSlug(article);
                     history.pushState({ slug: slug }, '', getArticlePath(article));
@@ -743,10 +756,6 @@
                 const date = article.pubDate ? new Date(article.pubDate).toLocaleDateString('si-LK') : '';
                 const catLabel = CATEGORY_LABELS[article.category] || article.category || '';
                 card.href = getArticleHref(article);
-                if (article.source === 'rss') {
-                    card.target = '_blank';
-                    card.rel = 'noopener noreferrer';
-                }
 
                 card.innerHTML = `
                     <img src="${imgUrl}" alt="${article.title}" width="800" height="200" loading="lazy" onerror="this.src='https://via.placeholder.com/800x400?text=News'">
@@ -762,7 +771,6 @@
                     </div>
                 `;
                 card.addEventListener('click', (e) => {
-                    if (article.source === 'rss') return;
                     e.preventDefault();
                     const slug = getArticleSlug(article);
                     history.pushState({ slug: slug }, '', getArticlePath(article));
@@ -948,7 +956,7 @@
                 </div>
             <img src="${formatThumb(article.thumbnail, 's800')}" alt="${shareTitle}" width="800" height="420" style="width:100%; border-radius:20px; margin:15px 0;" onerror="this.src='https://via.placeholder.com/800x400?text=News'">
                 ${article.description ? `<p><strong>විස්තරය:</strong><br>${article.description}</p>` : ''}
-                ${isManual && article.content ? `<div class="full-content"><strong>සම්පූර්ණ පුවත:</strong><br>${article.content}</div>` : ''}
+                ${article.content ? `<div class="full-content"><strong>සම්පූර්ණ පුවත:</strong><br>${article.content}</div>` : ''}
                 
                 <!-- AI සාරාංශ බොත්තම -->
                 <div style="margin-top:15px;">
