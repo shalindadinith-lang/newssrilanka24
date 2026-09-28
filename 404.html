@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>පිටුව හමු නොවීය | News Sri Lanka 24</title>
+  <title>පිටුව හමු නොවීය (404) | News Sri Lanka 24</title>
   <meta name="description" content="ඔබ සොයන පිටුව newssrilanka24.com.lk වෙබ් අඩවියේ නැත. මුල් පිටුවට ගොස් නවතම පුවත් කියවන්න.">
   <meta name="robots" content="noindex, follow">
   <link rel="canonical" href="https://newssrilanka24.com.lk/404.html">
   <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/logo.png">
   <meta property="og:title" content="පිටුව හමු නොවීය | News Sri Lanka 24">
   <meta property="og:description" content="ඔබ සොයන පිටුව නැත. මුල් පිටුවට යන්න.">
   <meta property="og:image" content="https://newssrilanka24.com.lk/og-default.png">
@@ -15,64 +16,136 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="si_LK">
   <meta property="og:site_name" content="News Sri Lanka 24">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700&family=Noto+Sans+Sinhala:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+Sinhala:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary: #dc2626;
+      --primary-dark: #b91c1c;
+      --primary-gradient: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      --border: #e2e8f0;
+      --radius-lg: 24px;
+      --radius-pill: 9999px;
+      --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+    }
     body {
-      font-family: "Inter", "Noto Sans Sinhala", sans-serif;
-      background: #f5f7fb;
-      color: #1e293b;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-    .top-bar { background: #c40000; color: #fff; padding: 12px 24px; }
-    .logo { color: #fff; text-decoration: none; font-size: 1.25rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
-    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
-    .card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 24px;
-      max-width: 560px;
-      width: 100%;
-      padding: 36px 28px;
-      text-align: center;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+    .top-bar {
+      background: #0f172a;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-    h1 { font-size: 1.6rem; margin: 12px 0 10px; }
-    p { color: #475569; line-height: 1.7; margin-bottom: 22px; }
-    .code { font-size: 2.2rem; font-weight: 700; color: #c40000; }
-    .nav { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-    a.btn {
-      background: #c40000;
+    .logo {
       color: #fff;
       text-decoration: none;
-      padding: 12px 22px;
-      border-radius: 40px;
-      font-weight: 600;
+      font-size: 1.3rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
-    a.link { color: #c40000; font-weight: 600; text-decoration: none; padding: 12px 10px; }
-    footer { text-align: center; padding: 20px; color: #64748b; }
-    footer a { color: #c40000; text-decoration: none; font-weight: 600; }
+    .logo span { color: var(--primary); }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 540px;
+      width: 100%;
+      padding: 42px 32px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+    }
+    .code {
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+    h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    p {
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 26px;
+      font-size: 0.95rem;
+    }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    a.btn {
+      background: var(--primary-gradient);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    a.btn:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
   </style>
 </head>
 <body>
   <header class="top-bar">
-    <a class="logo" href="https://newssrilanka24.com.lk/">newssrilanka24.com.lk</a>
+    <a class="logo" href="https://newssrilanka24.com.lk/">
+      <i class="fas fa-newspaper" style="color:var(--primary);"></i> News Sri Lanka <span>24</span>
+    </a>
   </header>
   <main>
     <div class="card">
       <div class="code">404</div>
       <h1>පිටුව හමු නොවීය</h1>
-      <p>ඔබ ඉල්ලූ ලිපිනය වෙනස් වී ඇති, මකා ඇති, හෝ වැරදි විය හැක. මුල් පිටුවෙන් නවතම පුවත් බලන්න.</p>
+      <p>ඔබ සොයන ලිපිනය වෙනස් කර ඇති, මකා ඇති, හෝ වැරදි විය හැක. මුල් පිටුවෙන් නවතම පුවත් කියවන්න.</p>
       <div class="nav">
-        <a class="btn" href="https://newssrilanka24.com.lk/">මුල් පිටුව</a>
-        <a class="link" href="https://newssrilanka24.com.lk/#newsGrid">නවතම පුවත්</a>
+        <a class="btn" href="https://newssrilanka24.com.lk/"><i class="fas fa-home"></i> මුල් පිටුවට යන්න</a>
       </div>
     </div>
   </main>
   <footer>
-    <a href="https://newssrilanka24.com.lk/">News Sri Lanka 24</a>
+    <p>© 2026 <a href="https://newssrilanka24.com.lk/">News Sri Lanka 24</a>. සැබෑ කාලීන පුවත් සාරාංශ.</p>
   </footer>
 </body>
 </html>
