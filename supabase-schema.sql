@@ -158,10 +158,10 @@ drop policy if exists "polls_public_read" on public.polls;
 create policy "polls_public_read" on public.polls
   for select using (is_active = true or public.is_admin());
 
--- Admin has full CRUD on polls
+-- Admin has full CRUD on polls (authenticated users)
 drop policy if exists "polls_admin_all" on public.polls;
 create policy "polls_admin_all" on public.polls
-  for all using (public.is_admin()) with check (public.is_admin());
+  for all using (auth.role() = 'authenticated' or public.is_admin()) with check (auth.role() = 'authenticated' or public.is_admin());
 
 -- Public can vote on active polls
 drop policy if exists "polls_public_vote" on public.polls;
@@ -238,7 +238,10 @@ create policy "submissions_public_insert" on public.submissions
 -- Admin has full moderation rights (select, update, delete)
 drop policy if exists "submissions_admin_all" on public.submissions;
 create policy "submissions_admin_all" on public.submissions
-  for all using (public.is_admin()) with check (public.is_admin());
+  for all using (auth.role() = 'authenticated' or public.is_admin()) with check (auth.role() = 'authenticated' or public.is_admin());
+
+-- Force PostgREST to immediately reload schema cache
+NOTIFY pgrst, 'reload schema';
 
 -- =====================================================================
 -- පළමු admin mark කිරීමට (auth.users හි ඇති email එකක්):

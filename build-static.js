@@ -1123,6 +1123,79 @@ function printfDescription(content) {
   return stripHtml(content || "").replace(/\s+/g, " ").trim();
 }
 
+// --- RSS 2.0 Feed Generator ----------------------------------------------
+function toRfc822Date(dateVal) {
+  try {
+    const d = new Date(dateVal);
+    return isNaN(d.getTime()) ? new Date().toUTCString() : d.toUTCString();
+  } catch (_) {
+    return new Date().toUTCString();
+  }
+}
+
+function renderRssFeed(articles, buildDate) {
+  const items = articles.slice(0, 50).map((a) => {
+    const row = a.row || {};
+    const url = articleUrl(a.slug);
+    const title = (row.title || "Untitled").trim();
+    const rawDesc = row.short_description || printfDescription(row.content) || "";
+    const cleanDesc = stripHtml(rawDesc).replace(/\s+/g, " ").trim();
+    const truncatedDesc = cleanDesc.length > 400 ? cleanDesc.slice(0, 400) + "..." : cleanDesc;
+    const content = (row.content || cleanDesc || "").trim();
+    const pubDate = toRfc822Date(row.published_at || row.created_at);
+    const cat = row.category || "general";
+    const catLabel = CATEGORY_LABELS[cat] || cat;
+    const author = cleanAuthor(row.author) || SEO.SITE_NAME;
+    const image = row.image_url && !row.image_url.includes("via.placeholder.com") ? row.image_url : "";
+
+    return [
+      "    <item>",
+      `      <title><![CDATA[${title}]]></title>`,
+      `      <link>${escXml(url)}</link>`,
+      `      <guid isPermaLink="true">${escXml(url)}</guid>`,
+      `      <description><![CDATA[${truncatedDesc}]]></description>`,
+      `      <content:encoded><![CDATA[${content}]]></content:encoded>`,
+      `      <category><![CDATA[${catLabel}]]></category>`,
+      `      <dc:creator><![CDATA[${author}]]></dc:creator>`,
+      `      <pubDate>${pubDate}</pubDate>`,
+      image
+        ? `      <enclosure url="${escXml(image)}" length="0" type="image/jpeg" />\n` +
+          `      <media:content url="${escXml(image)}" medium="image">\n` +
+          `        <media:title><![CDATA[${title}]]></media:title>\n` +
+          `      </media:content>\n` +
+          `      <media:thumbnail url="${escXml(image)}" />`
+        : "",
+      "    </item>"
+    ].filter(Boolean).join("\n");
+  });
+
+  return (
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<rss version="2.0"\n' +
+    '  xmlns:content="http://purl.org/rss/1.0/modules/content/"\n' +
+    '  xmlns:dc="http://purl.org/dc/elements/1.1/"\n' +
+    '  xmlns:atom="http://www.w3.org/2005/Atom"\n' +
+    '  xmlns:media="http://search.yahoo.com/mrss/">\n' +
+    '  <channel>\n' +
+    `    <title><![CDATA[${SEO.SITE_NAME} | සැබෑ කාලීන සිංහල පුවත් සාරාංශ]]></title>\n` +
+    `    <link>${SITE}/</link>\n` +
+    `    <atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml" />\n` +
+    `    <description><![CDATA[${SEO.SITE_DESCRIPTION || "ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව සහ විශ්වාසනීයව ඔබ වෙත ගෙන එන ඩිජිටල් පුවත් වේදිකාව."}]]></description>\n` +
+    '    <language>si-LK</language>\n' +
+    `    <lastBuildDate>${buildDate}</lastBuildDate>\n` +
+    '    <generator>News Sri Lanka 24 Feed Engine</generator>\n' +
+    '    <image>\n' +
+    `      <url>${SITE}/logo.png</url>\n` +
+    `      <title><![CDATA[${SEO.SITE_NAME}]]></title>\n` +
+    `      <link>${SITE}/</link>\n` +
+    '    </image>\n' +
+    `    <copyright><![CDATA[© ${new Date().getFullYear()} ${SEO.SITE_NAME}. All rights reserved.]]></copyright>\n` +
+    items.join("\n") +
+    "\n  </channel>\n" +
+    "</rss>\n"
+  );
+}
+
 // --- Main ---------------------------------------------------------------
 async function main() {
   console.log("=== Static article pre-render ===");
@@ -1173,6 +1246,13 @@ async function main() {
   const sitemapPath = path.join(ROOT, "sitemap.xml");
   const sitemapChanged = writeFileIfChanged("sitemap.xml", renderSitemap(articles, todayISO()));
   console.log("Sitemap:", sitemapChanged ? "updated (" + articles.length + " article URLs)" : "unchanged");
+
+  const buildDateRFC = new Date().toUTCString();
+  const rssXml = renderRssFeed(articles, buildDateRFC);
+  const rssChanged = writeFileIfChanged("rss.xml", rssXml);
+  const feedChanged = writeFileIfChanged("feed.xml", rssXml);
+  console.log("RSS Feed (rss.xml):", rssChanged ? "updated (" + Math.min(articles.length, 50) + " items)" : "unchanged");
+  console.log("RSS Feed (feed.xml):", feedChanged ? "updated (" + Math.min(articles.length, 50) + " items)" : "unchanged");
 
   console.log(
     "Done. Wrote " + written + " article page(s). Generated dir: article/{slug}/index.html"
