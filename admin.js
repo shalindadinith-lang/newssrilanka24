@@ -158,6 +158,7 @@ function showDashboard() {
   $("dashboard").style.display = "block";
   $("adminUserInfo").style.display = "flex";
   resetEditor();
+  updatePendingCount();
 }
 
 // Login
@@ -186,17 +187,23 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     const tab = btn.dataset.tab;
-    $("tab-list").style.display   = tab === "list" ? "block" : "none";
-    $("tab-editor").style.display = tab === "editor" ? "block" : "none";
+    $("tab-list").style.display        = tab === "list" ? "block" : "none";
+    $("tab-editor").style.display      = tab === "editor" ? "block" : "none";
+    $("tab-submissions").style.display = tab === "submissions" ? "block" : "none";
+    $("tab-poll").style.display        = tab === "poll" ? "block" : "none";
     if (tab === "list") loadNews();
     if (tab === "editor") $("newsFormTitle").innerHTML = '<i class="fas fa-edit"></i> Add News';
+    if (tab === "submissions") loadSubmissions();
+    if (tab === "poll") loadPollAdmin();
   });
 });
 
 function switchTab(tab) {
   document.querySelectorAll(".tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
-  $("tab-list").style.display   = tab === "list" ? "block" : "none";
-  $("tab-editor").style.display = tab === "editor" ? "block" : "none";
+  $("tab-list").style.display        = tab === "list" ? "block" : "none";
+  $("tab-editor").style.display      = tab === "editor" ? "block" : "none";
+  $("tab-submissions").style.display = tab === "submissions" ? "block" : "none";
+  $("tab-poll").style.display        = tab === "poll" ? "block" : "none";
 }
 
 // ------------------------------------------------------------- News ----
@@ -505,6 +512,517 @@ async function removeStorageFile(publicUrl) {
   if (!rel) return;
   await supabase.storage.from("news").remove([rel]);
 }
+
+// =======================================================
+// SUBMISSIONS MODERATION SYSTEM
+// =======================================================
+
+let submissionsCache = {};
+let currentSubFilter = "pending";
+
+async function updatePendingCount() {
+  try {
+    const { count, error } = await supabase
+      .from("submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending");
+    if (!error && count !== null) {
+      const badge = $("pendingBadge");
+      if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? "inline-block" : "none";
+      }
+    }
+  } catch (e) {}
+}
+
+async function loadSubmissions(filter = currentSubFilter) {
+  currentSubFilter = filter;
+  const tbody = $("submissionsTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7">පූරණය වෙමින්...</td></tr>';
+
+  try {
+    let query = supabase.from("submissions").select("*").order("created_at", { ascending: false });
+    if (filter !== "all") {
+      query = query.eq("status", filter);
+    }
+    const { data, error } = await query;
+    if (error) {
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);">Submissions table load error: ' + escapeHtml(error.message) + '<br><small>Supabase SQL Editor හි අදාළ schema update එක run කර ඇත්දැයි තහවුරු කරන්න.</small></td></tr>';
+      return;
+    }
+    submissionsCache = {};
+    tbody.innerHTML = "";
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">"${filter}" යටතේ කිසිදු submission එකක් නැත.</td></tr>`;
+      updatePendingCount();
+      return;
+    }
+    data.forEach((row) => {
+      submissionsCache[row.id] = row;
+      tbody.appendChild(buildSubmissionRow(row));
+    });
+    updatePendingCount();
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);">Error: ' + escapeHtml(err.message) + '</td></tr>';
+  }
+}
+
+function buildSubmissionRow(row) {
+  const tr = document.createElement("tr");
+  const d = toDate(row.created_at);
+  const dateStr = d ? d.toLocaleString("si-LK") : "-";
+  const typeBadge = row.type === "ad" ? "📢 දැන්වීම් (Ad)" : "📰 පුවත් (News)";
+  const status = row.status || "pending";
+  const statusLabel = status === "approved" ? "Approved" : (status === "rejected" ? "Rejected" : "Pending");
+
+  tr.innerHTML = `
+    <td><span style="font-size:0.8rem; font-weight:700;">${typeBadge}</span></td>
+    <td><strong>${escapeHtml(row.title || "")}</strong></td>
+    <td>${CATEGORY_LABELS[row.category] || row.category || "-"}</td>
+    <td>${escapeHtml(row.contact_info || "Anonymous")}</td>
+    <td>${dateStr}</td>
+    <td><span class="status-badge ${status}">${statusLabel}</span></td>
+    <td class="actions-cell">
+      <button class="btn btn-info btn-sm" data-sub-action="view" data-id="${row.id}">View</button>
+      <button class="btn btn-secondary btn-sm" data-sub-action="edit" data-id="${row.id}">Edit</button>
+      ${status !== "approved" ? `<button class="btn btn-primary btn-sm" data-sub-action="approve" data-id="${row.id}"><i class="fas fa-check"></i> Approve</button>` : `<span style="color:var(--green);font-size:0.8rem;font-weight:600;"><i class="fas fa-check-circle"></i> Live</span>`}
+      <button class="btn btn-danger btn-sm" data-sub-action="delete" data-id="${row.id}">Delete</button>
+    </td>
+  `;
+  return tr;
+}
+
+const subTableBody = $("submissionsTableBody");
+if (subTableBody) {
+  subTableBody.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-sub-action]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const row = submissionsCache[id];
+    const act = btn.dataset.subAction;
+    if (act === "view") viewSubmission(row);
+    else if (act === "edit") editSubmission(row);
+    else if (act === "approve") approveSubmission(row);
+    else if (act === "delete") deleteSubmission(id);
+  });
+}
+
+document.querySelectorAll("button[data-sub-filter]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("button[data-sub-filter]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadSubmissions(btn.dataset.subFilter);
+  });
+});
+
+const refreshSubBtn = $("refreshSubmissionsBtn");
+if (refreshSubBtn) refreshSubBtn.addEventListener("click", () => loadSubmissions());
+
+function viewSubmission(row) {
+  if (!row) return;
+  const body = $("submissionViewBody");
+  const d = toDate(row.created_at);
+  const typeBadge = row.type === "ad" ? "📢 දැන්වීමක් (Advertisement)" : "📰 පුවතක් (News Article)";
+  body.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:14px;">
+      <div>
+        <span class="status-badge ${row.status}">${row.status.toUpperCase()}</span>
+        <span style="font-weight:700; margin-left:8px;">${typeBadge}</span>
+      </div>
+      <small style="color:var(--text-secondary);">${d ? d.toLocaleString("si-LK") : ""}</small>
+    </div>
+    <h2 style="color:var(--primary); margin-bottom:10px;">${escapeHtml(row.title)}</h2>
+    <p style="color:var(--text-secondary); margin-bottom:12px;">
+      <strong>Category:</strong> ${CATEGORY_LABELS[row.category] || row.category || "-"} &nbsp;|&nbsp;
+      <strong>Contact / Submitter:</strong> ${escapeHtml(row.contact_info || "Not provided")}
+    </p>
+    ${row.image_url ? `<img src="${escapeHtml(row.image_url)}" style="width:100%; max-height:400px; object-fit:cover; border-radius:16px; margin:12px 0;">` : ""}
+    <div style="background:var(--bg); padding:16px; border-radius:14px; margin-top:14px; line-height:1.8; white-space:pre-wrap;">${escapeHtml(row.description || row.content || "No description provided.")}</div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('submissionViewModal').style.display='none'">Close</button>
+      ${row.status !== "approved" ? `<button class="btn btn-primary" onclick="approveFromModal('${row.id}')"><i class="fas fa-check-circle"></i> Approve &amp; Publish</button>` : ""}
+    </div>
+  `;
+  $("submissionViewModal").style.display = "flex";
+}
+
+window.approveFromModal = (id) => {
+  closeModal("submissionViewModal");
+  approveSubmission(submissionsCache[id]);
+};
+
+function editSubmission(row) {
+  if (!row) return;
+  $("editSubId").value = row.id;
+  $("editSubType").value = row.type || "ad";
+  $("editSubCategory").value = row.category || "general";
+  $("editSubTitle").value = row.title || "";
+  $("editSubDescription").value = row.description || row.content || "";
+  $("editSubImageUrl").value = row.image_url || "";
+  $("editSubContact").value = row.contact_info || "";
+  const prevEl = $("editSubImagePreview");
+  if (row.image_url) {
+    prevEl.innerHTML = `<img src="${escapeHtml(row.image_url)}" style="max-width:240px; border-radius:10px;">`;
+  } else {
+    prevEl.innerHTML = "";
+  }
+  $("submissionEditModal").style.display = "flex";
+}
+
+const saveSubEditBtn = $("saveSubEditBtn");
+if (saveSubEditBtn) {
+  saveSubEditBtn.addEventListener("click", async () => {
+    const id = $("editSubId").value;
+    const title = $("editSubTitle").value.trim();
+    const description = $("editSubDescription").value.trim();
+    if (!title) { alert("Title is required."); return; }
+
+    const payload = {
+      type: $("editSubType").value,
+      category: $("editSubCategory").value,
+      title,
+      description,
+      content: description,
+      image_url: $("editSubImageUrl").value.trim(),
+      contact_info: $("editSubContact").value.trim()
+    };
+
+    const { error } = await supabase.from("submissions").update(payload).eq("id", id);
+    if (error) { alert("Update error: " + error.message); return; }
+    closeModal("submissionEditModal");
+    loadSubmissions();
+  });
+}
+
+const approveDirectlyBtn = $("approveDirectlyFromEditBtn");
+if (approveDirectlyBtn) {
+  approveDirectlyBtn.addEventListener("click", async () => {
+    const id = $("editSubId").value;
+    const title = $("editSubTitle").value.trim();
+    const description = $("editSubDescription").value.trim();
+    if (!title) { alert("Title is required."); return; }
+
+    const payload = {
+      type: $("editSubType").value,
+      category: $("editSubCategory").value,
+      title,
+      description,
+      content: description,
+      image_url: $("editSubImageUrl").value.trim(),
+      contact_info: $("editSubContact").value.trim()
+    };
+
+    const { error } = await supabase.from("submissions").update(payload).eq("id", id);
+    if (error) { alert("Update error: " + error.message); return; }
+    closeModal("submissionEditModal");
+    await approveSubmission({ ...payload, id });
+  });
+}
+
+async function approveSubmission(row) {
+  if (!row) return;
+  if (!confirm(`"${row.title}" පුවත/දැන්වීම සජීවීව අඩවියේ පළ කිරීමට අනුමත කරන්නද?`)) return;
+
+  const article = {
+    title: row.title,
+    short_description: row.description ? row.description.slice(0, 200) : "",
+    content: row.description || row.content || "",
+    category: row.category || "general",
+    language: "si",
+    author: row.contact_info ? `News Sri Lanka 24 (පාඨක යොමුකිරීම්: ${row.contact_info})` : "News Sri Lanka 24",
+    published_at: new Date().toISOString(),
+    status: "published",
+    is_breaking: false,
+    is_featured: false,
+    source: "manual",
+    image_url: row.image_url || "",
+    slug: generateSlug(row.title)
+  };
+
+  const { error: insErr } = await supabase.from("news").insert(article);
+  if (insErr) {
+    alert("Error publishing to news table: " + insErr.message);
+    return;
+  }
+
+  const { error: updErr } = await supabase.from("submissions").update({ status: "approved" }).eq("id", row.id);
+  if (updErr) {
+    console.warn("Submissions status update error:", updErr.message);
+  }
+
+  alert("✅ පුවත/දැන්වීම සාර්ථකව අනුමත කර සජීවීව පළ කරන ලදී!");
+  loadSubmissions();
+  triggerInstantRegeneration();
+}
+
+async function deleteSubmission(id) {
+  if (!confirm("මෙම Submission එක ස්ථිරවම මකා දමන්නද?")) return;
+  const { error } = await supabase.from("submissions").delete().eq("id", id);
+  if (error) { alert("Delete error: " + error.message); return; }
+  loadSubmissions();
+}
+
+const closeSubView = $("closeSubViewModal");
+if (closeSubView) closeSubView.addEventListener("click", () => closeModal("submissionViewModal"));
+const closeSubEdit = $("closeSubEditModal");
+if (closeSubEdit) closeSubEdit.addEventListener("click", () => closeModal("submissionEditModal"));
+["submissionViewModal", "submissionEditModal"].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener("click", (e) => { if (e.target === el) closeModal(id); });
+});
+
+// =======================================================
+// DAILY POLL MANAGEMENT
+// =======================================================
+
+let currentPollId = null;
+
+async function loadPollAdmin() {
+  const msgEl = $("pollStatusMsg");
+  if (msgEl) msgEl.style.display = "none";
+
+  try {
+    const { data: polls, error } = await supabase
+      .from("polls")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      if (msgEl) {
+        msgEl.innerHTML = `<span style="color:var(--red);">Polls table load error: ${escapeHtml(error.message)}.<br><small>Supabase SQL editor හි polls table එක සාදා ඇත්දැයි තහවුරු කරන්න.</small></span>`;
+        msgEl.style.display = "block";
+      }
+      renderDefaultPollBuilder();
+      return;
+    }
+
+    renderPollsHistoryTable(polls || []);
+
+    const activePoll = (polls || []).find(p => p.is_active) || (polls || [])[0];
+    if (activePoll) {
+      populatePollForm(activePoll);
+    } else {
+      renderDefaultPollBuilder();
+    }
+  } catch (err) {
+    if (msgEl) {
+      msgEl.innerHTML = `<span style="color:var(--red);">Error: ${escapeHtml(err.message)}</span>`;
+      msgEl.style.display = "block";
+    }
+    renderDefaultPollBuilder();
+  }
+}
+
+function renderDefaultPollBuilder() {
+  currentPollId = null;
+  $("pollId").value = "";
+  $("pollQuestion").value = "ලබන වසරේ ශ්‍රී ලංකා ආර්ථිකයේ වර්ධනය පිළිබඳ ඔබගේ බලාපොරොත්තුව කුමක්ද?";
+  $("pollIsActive").checked = true;
+  const container = $("pollOptionsContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  addPollOptionRow("📈 ඉතා යහපත් (Positive)", 45, "positive");
+  addPollOptionRow("⚖️ මධ්‍යස්ථයි (Moderate)", 35, "moderate");
+  addPollOptionRow("📉 අභියෝගාත්මකයි (Challenging)", 20, "challenging");
+}
+
+function populatePollForm(poll) {
+  currentPollId = poll.id;
+  $("pollId").value = poll.id;
+  $("pollQuestion").value = poll.question || "";
+  $("pollIsActive").checked = !!poll.is_active;
+
+  const container = $("pollOptionsContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  let options = poll.options;
+  if (typeof options === "string") {
+    try { options = JSON.parse(options); } catch (e) { options = []; }
+  }
+  if (Array.isArray(options) && options.length > 0) {
+    options.forEach(opt => {
+      addPollOptionRow(opt.text || "", opt.votes || 0, opt.id || generateOptId());
+    });
+  } else {
+    addPollOptionRow("ඔව් (Yes)", 0, "yes");
+    addPollOptionRow("නැත (No)", 0, "no");
+  }
+}
+
+function generateOptId() {
+  return "opt_" + Math.random().toString(36).substring(2, 8);
+}
+
+function addPollOptionRow(text = "", votes = 0, id = generateOptId()) {
+  const container = $("pollOptionsContainer");
+  if (!container) return;
+  const row = document.createElement("div");
+  row.className = "poll-option-row";
+  row.dataset.optId = id;
+  row.innerHTML = `
+    <input type="text" class="poll-opt-text" placeholder="Option text (e.g. ඔව් / Yes)" value="${escapeHtml(text)}">
+    <div style="display:flex; align-items:center; gap:4px;">
+      <small style="color:var(--text-secondary);font-size:0.75rem;">Votes:</small>
+      <input type="number" class="poll-opt-votes" min="0" value="${parseInt(votes) || 0}">
+    </div>
+    <button type="button" class="btn btn-danger btn-sm remove-opt-btn" title="Remove Option"><i class="fas fa-trash"></i></button>
+  `;
+  row.querySelector(".remove-opt-btn").addEventListener("click", () => {
+    if (container.querySelectorAll(".poll-option-row").length <= 2) {
+      alert("අවම වශයෙන් විකල්ප 2ක් තිබිය යුතුය (At least 2 options required).");
+      return;
+    }
+    row.remove();
+  });
+  container.appendChild(row);
+}
+
+const addPollOptBtn = $("addPollOptionBtn");
+if (addPollOptBtn) addPollOptBtn.addEventListener("click", () => addPollOptionRow("", 0));
+
+const savePollBtn = $("savePollBtn");
+if (savePollBtn) {
+  savePollBtn.addEventListener("click", async () => {
+    const question = $("pollQuestion").value.trim();
+    if (!question) { alert("Poll question is required."); return; }
+
+    const rows = $("pollOptionsContainer").querySelectorAll(".poll-option-row");
+    if (rows.length < 2) { alert("At least 2 options are required."); return; }
+
+    const options = [];
+    rows.forEach((r, idx) => {
+      const text = r.querySelector(".poll-opt-text").value.trim();
+      const votes = parseInt(r.querySelector(".poll-opt-votes").value) || 0;
+      const optId = r.dataset.optId || ("opt_" + idx);
+      if (text) {
+        options.push({ id: optId, text, votes });
+      }
+    });
+
+    if (options.length < 2) { alert("Please provide text for at least 2 options."); return; }
+
+    const isActive = $("pollIsActive").checked;
+    const pollId = $("pollId").value;
+    const msgEl = $("pollStatusMsg");
+
+    try {
+      if (isActive) {
+        await supabase.from("polls").update({ is_active: false }).neq("id", pollId || "00000000-0000-0000-0000-000000000000");
+      }
+
+      let res;
+      if (pollId) {
+        res = await supabase.from("polls").update({
+          question,
+          options,
+          is_active: isActive
+        }).eq("id", pollId);
+      } else {
+        res = await supabase.from("polls").insert({
+          question,
+          options,
+          is_active: isActive
+        });
+      }
+
+      if (res.error) {
+        alert("Error saving poll: " + res.error.message);
+        return;
+      }
+
+      if (msgEl) {
+        msgEl.innerHTML = `<span style="color:var(--green); font-weight:600;">✅ දවසේ මත විමසුම සාර්ථකව සුරකින ලදී! (Poll saved successfully)</span>`;
+        msgEl.style.display = "block";
+      }
+      loadPollAdmin();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  });
+}
+
+const resetPollVotesBtn = $("resetPollVotesBtn");
+if (resetPollVotesBtn) {
+  resetPollVotesBtn.addEventListener("click", async () => {
+    if (!confirm("මෙම මත විමසුමේ සියලු ඡන්ද ගණන් 0 (Zero) කිරීමට අවශ්‍යද?")) return;
+    const rows = $("pollOptionsContainer").querySelectorAll(".poll-option-row");
+    rows.forEach(r => {
+      r.querySelector(".poll-opt-votes").value = 0;
+    });
+    const pollId = $("pollId").value;
+    if (pollId) {
+      const options = [];
+      rows.forEach((r, idx) => {
+        const text = r.querySelector(".poll-opt-text").value.trim();
+        const optId = r.dataset.optId || ("opt_" + idx);
+        options.push({ id: optId, text, votes: 0 });
+      });
+      await supabase.from("polls").update({ options }).eq("id", pollId);
+      alert("ඡන්ද සංඛ්‍යා 0 ට reset කරන ලදී.");
+      loadPollAdmin();
+    }
+  });
+}
+
+const newPollBtn = $("newPollBtn");
+if (newPollBtn) {
+  newPollBtn.addEventListener("click", () => {
+    renderDefaultPollBuilder();
+    $("pollQuestion").value = "";
+    $("pollOptionsContainer").innerHTML = "";
+    addPollOptionRow("", 0);
+    addPollOptionRow("", 0);
+  });
+}
+
+function renderPollsHistoryTable(polls) {
+  const tbody = $("pollsHistoryTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!polls || polls.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">No polls recorded yet.</td></tr>`;
+    return;
+  }
+  polls.forEach(p => {
+    const tr = document.createElement("tr");
+    let opts = p.options;
+    if (typeof opts === "string") { try { opts = JSON.parse(opts); } catch(e){ opts = []; } }
+    const totalVotes = Array.isArray(opts) ? opts.reduce((acc, o) => acc + (parseInt(o.votes) || 0), 0) : 0;
+    const d = toDate(p.created_at);
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.question || "")}</strong></td>
+      <td>${Array.isArray(opts) ? opts.length : 0} options</td>
+      <td><strong>${totalVotes}</strong></td>
+      <td><span class="status-badge ${p.is_active ? 'approved' : 'pending'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+      <td>${d ? d.toLocaleDateString("si-LK") : "-"}</td>
+      <td class="actions-cell">
+        <button class="btn btn-secondary btn-sm" onclick="editPollHistory('${p.id}')">Edit</button>
+        ${!p.is_active ? `<button class="btn btn-primary btn-sm" onclick="activatePollHistory('${p.id}')">Activate</button>` : ""}
+        <button class="btn btn-danger btn-sm" onclick="deletePollHistory('${p.id}')">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.editPollHistory = async (id) => {
+  const { data } = await supabase.from("polls").select("*").eq("id", id).maybeSingle();
+  if (data) populatePollForm(data);
+};
+
+window.activatePollHistory = async (id) => {
+  await supabase.from("polls").update({ is_active: false }).neq("id", id);
+  await supabase.from("polls").update({ is_active: true }).eq("id", id);
+  loadPollAdmin();
+};
+
+window.deletePollHistory = async (id) => {
+  if (!confirm("මෙම Poll එක ස්ථිරවම මකා දමන්නද?")) return;
+  await supabase.from("polls").delete().eq("id", id);
+  loadPollAdmin();
+};
 
 // Init
 initAuth();

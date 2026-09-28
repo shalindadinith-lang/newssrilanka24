@@ -263,3 +263,66 @@ input[type="file"] {
     .editor-card { padding: 18px; }
     .form-actions .btn { flex: 1; justify-content: center; }
 }
+
+/* Submissions & Poll additions */
+.badge-count {
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.status-badge.pending { background: #fef3c7; color: #b45309; }
+.status-badge.approved { background: #dcfce7; color: #15803d; }
+.status-badge.rejected { background: #fee2e2; color: #b91c1c; }
+
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+}
+.filter-btn.active, .filter-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.poll-option-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.poll-option-row input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+}
+.poll-option-row input[type="number"] {
+    width: 90px;
+    padding: 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+}

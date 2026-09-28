@@ -48,6 +48,8 @@
         <div class="admin-tabs">
             <button class="tab-btn active" data-tab="list"><i class="fas fa-list"></i> News List</button>
             <button class="tab-btn" data-tab="editor"><i class="fas fa-plus-circle"></i> Add News</button>
+            <button class="tab-btn" data-tab="submissions"><i class="fas fa-inbox"></i> Submissions <span id="pendingBadge" class="badge-count" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="poll"><i class="fas fa-square-poll-vertical"></i> Daily Poll</button>
         </div>
 
         <!-- News List -->
@@ -156,9 +158,94 @@
                 </form>
             </div>
         </div>
+
+        <!-- Visitor Submissions Moderation Tab -->
+        <div id="tab-submissions" class="tab-panel" style="display:none;">
+            <div class="filter-bar">
+                <span style="font-weight:600; font-size:0.9rem;">Filter:</span>
+                <button class="filter-btn active" data-sub-filter="pending">Pending (පොරොත්තු)</button>
+                <button class="filter-btn" data-sub-filter="all">All (සියල්ල)</button>
+                <button class="filter-btn" data-sub-filter="approved">Approved (අනුමත කළ)</button>
+                <button class="filter-btn" data-sub-filter="rejected">Rejected (ප්‍රතික්ෂේප කළ)</button>
+                <button id="refreshSubmissionsBtn" class="btn btn-secondary btn-sm" style="margin-left:auto;"><i class="fas fa-rotate"></i> Refresh</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Contact / Submitter</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Daily Poll Management Tab -->
+        <div id="tab-poll" class="tab-panel" style="display:none;">
+            <div class="editor-card">
+                <h2><i class="fas fa-square-poll-vertical"></i> දවසේ මත විමසුම කළමනාකරණය (Daily Poll)</h2>
+                <p style="color:var(--text-secondary); margin-bottom: 20px;">මෙහිදී ඔබට මුල් පිටුවේ දිස්වන දවසේ මත විමසුමේ ප්‍රශ්නය සහ පිළිතුරු/විකල්ප පහසුවෙන්ම වෙනස් කළ හැක.</p>
+                <form id="pollForm">
+                    <input type="hidden" id="pollId">
+
+                    <div class="form-group">
+                        <label>Poll Question (ප්‍රශ්නය) *</label>
+                        <input type="text" id="pollQuestion" placeholder="උදා: ලබන වසරේ ශ්‍රී ලංකා ආර්ථිකයේ වර්ධනය පිළිබඳ ඔබගේ බලාපොරොත්තුව කුමක්ද?">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span>Answers / Options &amp; Initial Votes (පිළිතුරු / විකල්ප) *</span>
+                            <button type="button" id="addPollOptionBtn" class="btn btn-secondary btn-sm"><i class="fas fa-plus"></i> Add Option</button>
+                        </label>
+                        <div id="pollOptionsContainer">
+                            <!-- Dynamic option rows -->
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="margin-top:15px;">
+                        <label class="checkbox-label"><input type="checkbox" id="pollIsActive" checked> Active on Live Site (සක්‍රීය කරන්න)</label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="savePollBtn" class="btn btn-primary"><i class="fas fa-save"></i> Save Poll</button>
+                        <button type="button" id="resetPollVotesBtn" class="btn btn-secondary"><i class="fas fa-rotate-left"></i> Reset Votes to 0</button>
+                        <button type="button" id="newPollBtn" class="btn btn-info"><i class="fas fa-plus"></i> Create New Poll</button>
+                    </div>
+                    <div id="pollStatusMsg" style="display:none; margin-top:14px;"></div>
+                </form>
+            </div>
+
+            <!-- Existing Polls History Table -->
+            <div style="margin-top: 30px;">
+                <h3 style="margin-bottom: 12px; color: var(--primary);"><i class="fas fa-history"></i> Polls History</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Options Count</th>
+                                <th>Total Votes</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pollsHistoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- View Modal -->
+    <!-- View Modal (News) -->
     <div id="viewModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeViewModal">&times;</span>
@@ -166,11 +253,74 @@
         </div>
     </div>
 
-    <!-- Preview Modal -->
+    <!-- Preview Modal (News) -->
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closePreviewModal">&times;</span>
             <div id="previewBody"></div>
+        </div>
+    </div>
+
+    <!-- View Submission Modal -->
+    <div id="submissionViewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeSubViewModal">&times;</span>
+            <div id="submissionViewBody"></div>
+        </div>
+    </div>
+
+    <!-- Edit Submission Modal -->
+    <div id="submissionEditModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeSubEditModal">&times;</span>
+            <h2 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-edit"></i> Edit Submission</h2>
+            <form id="submissionEditForm">
+                <input type="hidden" id="editSubId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="editSubType">
+                            <option value="ad">දැන්වීම් (Advertisement)</option>
+                            <option value="news">පුවත් (News Article)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="editSubCategory">
+                            <option value="general">General</option>
+                            <option value="sri-lanka">Sri Lanka</option>
+                            <option value="world">World</option>
+                            <option value="business">Business</option>
+                            <option value="technology">Technology</option>
+                            <option value="sports">Sports</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="education">Education</option>
+                            <option value="health">Health</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="editSubTitle">
+                </div>
+                <div class="form-group">
+                    <label>Description / Details *</label>
+                    <textarea id="editSubDescription" rows="6"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="editSubImageUrl" placeholder="https://...">
+                    <div id="editSubImagePreview" style="margin-top:10px;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Contact Info</label>
+                    <input type="text" id="editSubContact">
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="saveSubEditBtn" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <button type="button" id="approveDirectlyFromEditBtn" class="btn btn-info"><i class="fas fa-check-circle"></i> Save &amp; Approve</button>
+                </div>
+            </form>
         </div>
     </div>
 

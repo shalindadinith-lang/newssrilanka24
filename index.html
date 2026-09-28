@@ -971,6 +971,199 @@
             margin-top: 10px;
         }
 
+        /* ================== FREE ADS / NEWS SUBMISSION BUTTON & MODAL ================== */
+        .btn-free-submit {
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            color: #ffffff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: var(--radius-pill);
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+            transition: var(--transition-smooth);
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .btn-free-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(234, 88, 12, 0.45);
+        }
+        .badge-free {
+            background: #ffffff;
+            color: #ea580c;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .submission-modal-card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            max-width: 600px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px 26px;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+            color: var(--text-main);
+            animation: modalFadeIn 0.25s ease;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .modal-close-btn:hover { color: var(--primary); }
+        .submission-modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header-icon-badge {
+            width: 54px;
+            height: 54px;
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 12px;
+            box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+        }
+        .submission-modal-header h3 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .modal-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .form-row-type {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .type-radio-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--surface-muted);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: var(--transition-smooth);
+        }
+        .type-radio-label:has(input:checked) {
+            border-color: #ea580c;
+            background: rgba(234, 88, 12, 0.08);
+            color: #ea580c;
+        }
+        .form-group-custom {
+            margin-bottom: 14px;
+        }
+        .form-group-custom label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+        .form-group-custom input[type="text"],
+        .form-group-custom textarea,
+        .form-group-custom select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface-muted);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+        .form-group-custom input[type="text"]:focus,
+        .form-group-custom textarea:focus,
+        .form-group-custom select:focus {
+            border-color: #ea580c;
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+        .image-upload-dropzone {
+            border: 2px dashed #f97316;
+            border-radius: var(--radius-md);
+            padding: 18px;
+            text-align: center;
+            background: rgba(234, 88, 12, 0.03);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .image-upload-dropzone:hover {
+            background: rgba(234, 88, 12, 0.08);
+        }
+        .submission-notice {
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.78rem;
+            color: #0369a1;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+        body.dark .submission-notice {
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+        }
+        .btn-submit-action {
+            width: 100%;
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: var(--radius-pill);
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+        .btn-submit-action:hover {
+            opacity: 0.93;
+            transform: translateY(-2px);
+        }
+
         /* ================== ARTICLE READING MODAL ================== */
         .modal {
             display: none;
@@ -1454,6 +1647,13 @@
                     <button id="searchBtn" aria-label="Search"><i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
+            <div class="header-post-action">
+                <button class="btn-free-submit" id="openSubmitModalBtn" title="නොමිලේ දැන්වීම් / පුවත් පළ කරන්න">
+                    <i class="fas fa-bullhorn"></i>
+                    <span class="btn-free-submit-text">නොමිලේ දැන්වීම් / පුවත් පළ කරන්න</span>
+                    <span class="badge-free">100% Free</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -1587,10 +1787,22 @@
                 <script src="https://www.highrevenueformat.com/dec4e43f04017b7d07d7deee36dc3e4a/invoke.js"></script>
             </div>
 
-            <!-- Interactive Daily Poll Widget -->
+            <!-- Free Ads / News Promotion Banner in Sidebar -->
+            <div class="sidebar-widget free-ad-widget" style="background: linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(249, 115, 22, 0.12) 100%); border: 2px dashed #f97316; border-radius: var(--radius-lg); padding: 18px; text-align: center; margin-bottom: 24px;">
+                <div style="width: 44px; height: 44px; background: #ea580c; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin: 0 auto 10px; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: #ea580c; margin-bottom: 6px;">නොමිලේ දැන්වීම් / පුවත් පළ කරන්න</h4>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">ඔබගේ ඕනෑම දැන්වීමක් හෝ පුවතක් 100% නොමිලේ අපගේ වෙබ් අඩවියේ පළ කිරීමට දැන්ම යොමු කරන්න.</p>
+                <button class="btn-free-submit" id="openSubmitModalSidebarBtn" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-paper-plane"></i> දැන්ම පළ කරන්න (100% Free)
+                </button>
+            </div>
+
+            <!-- Dynamic Daily Poll Widget -->
             <div class="sidebar-widget" id="pollWidget">
                 <h3 class="widget-title"><i class="fas fa-square-poll-vertical"></i> දවසේ මත විමසුම</h3>
-                <p class="poll-question">ශ්‍රී ලංකාවේ ඉදිරි ආර්ථික ගමන්මඟ පිළිබඳ ඔබගේ විශ්වාසය කෙබඳුද?</p>
+                <p class="poll-question" id="pollQuestionText">ලබන වසරේ ශ්‍රී ලංකා ආර්ථිකයේ වර්ධනය පිළිබඳ ඔබගේ බලාපොරොත්තුව කුමක්ද?</p>
                 <div class="poll-options" id="pollOptions">
                     <label class="poll-option-label" data-choice="positive">
                         <div class="poll-bar" id="pollBar-positive" style="width: 0%;"></div>
@@ -1650,6 +1862,84 @@
         </div>
     </div>
 
+    <!-- Free Ads / News Submission Modal -->
+    <div id="freeSubmitModal" class="modal">
+        <div class="submission-modal-card">
+            <button class="modal-close-btn" id="closeSubmitModalBtn" title="Close">&times;</button>
+            <div class="submission-modal-header">
+                <div class="header-icon-badge"><i class="fas fa-bullhorn"></i></div>
+                <h3>නොමිලේ දැන්වීම් / පුවත් පළ කරන්න</h3>
+                <p class="modal-subtitle">Post Free Advertisements or News Articles &bull; 100% නොමිලේ</p>
+            </div>
+            <form id="visitorSubmissionForm">
+                <div class="form-row-type">
+                    <label class="type-radio-label">
+                        <input type="radio" name="subType" value="ad" checked>
+                        <span>📢 දැන්වීමක් (Advertisement)</span>
+                    </label>
+                    <label class="type-radio-label">
+                        <input type="radio" name="subType" value="news">
+                        <span>📰 පුවතක් (News Article)</span>
+                    </label>
+                </div>
+
+                <div class="form-group-custom">
+                    <label>ප්‍රවර්ගය (Category)</label>
+                    <select id="subCategory">
+                        <option value="general">සාමාන්‍ය (General)</option>
+                        <option value="sri-lanka">ශ්‍රී ලංකා (Sri Lanka)</option>
+                        <option value="business">ව්‍යාපාර / රැකියා (Business / Jobs)</option>
+                        <option value="technology">තාක්ෂණය (Technology)</option>
+                        <option value="education">අධ්‍යාපනය (Education)</option>
+                        <option value="health">සෞඛ්‍ය (Health)</option>
+                        <option value="sports">ක්‍රීඩා (Sports)</option>
+                        <option value="entertainment">විනෝදාස්වාදය (Entertainment)</option>
+                    </select>
+                </div>
+
+                <div class="form-group-custom">
+                    <label>ශීර්ෂය (Title) *</label>
+                    <input type="text" id="subTitle" placeholder="ඔබගේ දැන්වීමේ හෝ පුවතේ ප්‍රධාන මාතෘකාව..." required>
+                </div>
+
+                <div class="form-group-custom">
+                    <label>විස්තරය (Description / Details) *</label>
+                    <textarea id="subDescription" rows="5" placeholder="සම්පූර්ණ විස්තරය, කොන්දේසි, මිල ගණන් හෝ පුවත් විස්තර මෙහි ඇතුළත් කරන්න..." required></textarea>
+                </div>
+
+                <div class="form-group-custom">
+                    <label>පින්තූරයක් (Image) <small style="color:var(--text-muted);">(විකල්පයි / Optional)</small></label>
+                    <div class="image-upload-dropzone" id="subDropzone">
+                        <i class="fas fa-cloud-arrow-up" style="font-size:1.8rem; color:#ea580c; margin-bottom:8px;"></i>
+                        <p style="font-size:0.9rem; margin-bottom:4px; font-weight:600;">පින්තූරය තෝරන්න (Select or Click to Upload)</p>
+                        <small style="color:var(--text-muted);">JPG, PNG, WebP (Max 5MB)</small>
+                        <input type="file" id="subImageInput" accept="image/*" style="display:none;">
+                    </div>
+                    <div id="subImagePreviewContainer" style="display:none; margin-top:10px; position:relative;">
+                        <img id="subImagePreview" src="" alt="Uploaded preview" style="max-height:180px; border-radius:12px; border:1px solid var(--border-color); width:100%; object-fit:cover;">
+                        <button type="button" id="removeSubImageBtn" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="form-group-custom">
+                    <label>ඔබගේ නම / දුරකථන අංකය (Contact Name &amp; Phone) <small style="color:var(--text-muted);">(විකල්පයි / Optional)</small></label>
+                    <input type="text" id="subContact" placeholder="07X XXX XXXX හෝ නම (විමසීම් සඳහා)">
+                </div>
+
+                <div class="submission-notice">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>ඔබ යොමු කරන දැන්වීම/පුවත අපගේ පරිපාලක මණ්ඩලය විසින් සමාලෝචනය කර ඉතා ඉක්මනින් වෙබ් අඩවියේ නොමිලේම සජීවීව පළ කරනු ඇත.</span>
+                </div>
+
+                <div id="subStatusMsg" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; font-size:0.9rem;"></div>
+
+                <button type="submit" id="submitPostBtn" class="btn-submit-action">
+                    <i class="fas fa-paper-plane"></i> නොමිලේ පළ කරන්න (Submit for Free)
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Floating Back to Top Button -->
     <button class="back-to-top" id="backToTopBtn" aria-label="Back to Top">
         <i class="fas fa-arrow-up"></i>
@@ -1660,18 +1950,21 @@
         <div class="footer-container">
             <div class="footer-brand">News Sri Lanka <span>24</span></div>
             <p class="footer-desc">ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව සහ විශ්වාසනීයව ඔබ වෙත ගෙන එන ඩිජිටල් පුවත් වේදිකාව.</p>
-            <nav class="footer-links" aria-label="Footer Navigation">
-                <a href="https://newssrilanka24.com.lk/">මුල් පිටුව</a>
-                <a href="https://newssrilanka24.com.lk/sitemap.xml">සයිට්මැප් (Sitemap)</a>
-                <a href="#newsGrid">නවතම පුවත්</a>
-                <a href="https://newssrilanka24.com.lk/admin.html">Admin</a>
-            </nav>
             <p class="footer-copy">© 2026 newssrilanka24.com.lk. All rights reserved. Designed for speed, SEO, and engagement.</p>
         </div>
     </footer>
 
     <!-- Main Application Logic (Preserves Supabase + RSS + Routing + AI Summary) -->
     <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
         const RSS_FEEDS = [
             'https://api.rss2json.com/v1/api.json?rss_url=https://www.lankacnews.com/feeds/posts/default?alt=rss'
         ];
@@ -2266,16 +2559,149 @@
             `;
         }
 
-        // --- Interactive Poll Logic (LocalStorage Persistent) ---
-        const pollKey = 'nsl_poll_v1';
-        const pollVoteBtn = document.getElementById('pollVoteBtn');
-        function initPoll() {
-            const saved = localStorage.getItem(pollKey);
-            if (saved) {
-                showPollResults(saved);
+        // --- Dynamic Daily Poll Management (Supabase connected + LocalStorage) ---
+        let currentPollData = null;
+
+        async function initDynamicPoll() {
+            const questionEl = document.getElementById('pollQuestionText');
+            const optionsEl = document.getElementById('pollOptions');
+            if (!questionEl || !optionsEl) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('polls')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error || !data) {
+                    // Fallback to initial local poll if table not yet populated
+                    initFallbackPoll();
+                    return;
+                }
+
+                currentPollData = data;
+                renderPollUI(data);
+            } catch (err) {
+                console.warn('Poll fetch exception, using fallback:', err);
+                initFallbackPoll();
             }
         }
-        function showPollResults(userChoice) {
+
+        function renderPollUI(poll) {
+            const questionEl = document.getElementById('pollQuestionText');
+            const optionsEl = document.getElementById('pollOptions');
+            const countEl = document.getElementById('pollTotalCount');
+            const voteBtn = document.getElementById('pollVoteBtn');
+            if (!questionEl || !optionsEl) return;
+
+            questionEl.textContent = poll.question;
+            const options = Array.isArray(poll.options) ? poll.options : [];
+            const totalVotes = options.reduce((sum, opt) => sum + (Number(opt.votes) || 0), 0);
+            if (countEl) countEl.textContent = totalVotes.toLocaleString();
+
+            const pollVotedKey = `nsl_voted_poll_${poll.id}`;
+            const userVotedId = localStorage.getItem(pollVotedKey);
+
+            let optionsHtml = '';
+            options.forEach(opt => {
+                const optVotes = Number(opt.votes) || 0;
+                const pct = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0;
+                const isSelected = userVotedId === opt.id;
+                optionsHtml += `
+                    <label class="poll-option-label ${isSelected ? 'selected' : ''}" data-choice="${opt.id}" style="position:relative; overflow:hidden;">
+                        <div class="poll-bar" id="pollBar-${opt.id}" style="width: ${userVotedId ? pct + '%' : '0%'};"></div>
+                        <input type="radio" name="pollVote" value="${opt.id}" ${isSelected ? 'checked' : ''} ${userVotedId ? 'disabled' : ''}>
+                        <span class="poll-option-text">${escapeHtml(opt.text)}</span>
+                        <span class="poll-pct" id="pollPct-${opt.id}" style="display:${userVotedId ? 'block' : 'none'}; font-weight:700;">${pct}%</span>
+                    </label>
+                `;
+            });
+            optionsEl.innerHTML = optionsHtml;
+
+            if (userVotedId) {
+                if (voteBtn) {
+                    voteBtn.disabled = true;
+                    voteBtn.style.opacity = '0.6';
+                    voteBtn.textContent = 'ඔබ ඡන්දය සටහන් කර ඇත (Voted)';
+                }
+            } else {
+                if (voteBtn) {
+                    voteBtn.disabled = false;
+                    voteBtn.style.opacity = '1';
+                    voteBtn.textContent = 'ඡන්දය දෙන්න (Vote)';
+                    voteBtn.onclick = () => submitPollVote(poll);
+                }
+            }
+        }
+
+        async function submitPollVote(poll) {
+            const selected = document.querySelector('input[name="pollVote"]:checked');
+            if (!selected) {
+                alert('කරුණාකර ඔබගේ මතය තෝරන්න.');
+                return;
+            }
+            const chosenId = selected.value;
+            const pollVotedKey = `nsl_voted_poll_${poll.id}`;
+            localStorage.setItem(pollVotedKey, chosenId);
+
+            const updatedOptions = (poll.options || []).map(opt => {
+                if (opt.id === chosenId) {
+                    return { ...opt, votes: (Number(opt.votes) || 0) + 1 };
+                }
+                return opt;
+            });
+
+            try {
+                // Try stored function first for atomic increment
+                const { data: rpcData, error: rpcErr } = await supabase.rpc('vote_poll', {
+                    p_id: poll.id,
+                    opt_id: chosenId
+                });
+
+                if (!rpcErr && rpcData) {
+                    poll.options = rpcData;
+                } else {
+                    await supabase
+                        .from('polls')
+                        .update({ options: updatedOptions })
+                        .eq('id', poll.id);
+                    poll.options = updatedOptions;
+                }
+            } catch (err) {
+                console.warn('Error saving vote to database:', err);
+                poll.options = updatedOptions;
+            }
+
+            renderPollUI(poll);
+        }
+
+        function initFallbackPoll() {
+            const pollKey = 'nsl_poll_v1';
+            const pollVoteBtn = document.getElementById('pollVoteBtn');
+            const saved = localStorage.getItem(pollKey);
+            if (saved) {
+                showPollResultsFallback(saved);
+            }
+            if (pollVoteBtn && !pollVoteBtn.dataset.bound) {
+                pollVoteBtn.dataset.bound = 'true';
+                pollVoteBtn.addEventListener('click', () => {
+                    const selected = document.querySelector('input[name="pollVote"]:checked');
+                    if (!selected) {
+                        alert('කරුණාකර ඔබගේ මතය තෝරන්න.');
+                        return;
+                    }
+                    localStorage.setItem(pollKey, selected.value);
+                    showPollResultsFallback(selected.value);
+                    const countEl = document.getElementById('pollTotalCount');
+                    if (countEl) countEl.textContent = '1,843';
+                });
+            }
+        }
+
+        function showPollResultsFallback(userChoice) {
             const pcts = { positive: 48, moderate: 34, challenging: 18 };
             if (userChoice === 'positive') pcts.positive += 2;
             if (userChoice === 'moderate') pcts.moderate += 2;
@@ -2291,26 +2717,14 @@
                 }
             });
 
+            const pollVoteBtn = document.getElementById('pollVoteBtn');
             if (pollVoteBtn) {
                 pollVoteBtn.disabled = true;
                 pollVoteBtn.style.opacity = '0.6';
                 pollVoteBtn.textContent = 'ඔබ ඡන්දය සටහන් කර ඇත (Voted)';
             }
         }
-        if (pollVoteBtn) {
-            pollVoteBtn.addEventListener('click', () => {
-                const selected = document.querySelector('input[name="pollVote"]:checked');
-                if (!selected) {
-                    alert('කරුණාකර ඔබගේ මතය තෝරන්න.');
-                    return;
-                }
-                localStorage.setItem(pollKey, selected.value);
-                showPollResults(selected.value);
-                const countEl = document.getElementById('pollTotalCount');
-                if (countEl) countEl.textContent = '1,843';
-            });
-        }
-        initPoll();
+        initDynamicPoll();
 
         // --- Open Article Modal ---
         function openModal(article) {
@@ -2653,6 +3067,225 @@
                 applyFilters();
             });
         });
+
+        // --- Visitor Free Ads / News Submission Handling ---
+        const freeSubmitModal = document.getElementById('freeSubmitModal');
+        const openSubmitModalBtn = document.getElementById('openSubmitModalBtn');
+        const openSubmitModalSidebarBtn = document.getElementById('openSubmitModalSidebarBtn');
+        const closeSubmitModalBtn = document.getElementById('closeSubmitModalBtn');
+        const visitorSubmissionForm = document.getElementById('visitorSubmissionForm');
+        const subDropzone = document.getElementById('subDropzone');
+        const subImageInput = document.getElementById('subImageInput');
+        const subImagePreviewContainer = document.getElementById('subImagePreviewContainer');
+        const subImagePreview = document.getElementById('subImagePreview');
+        const removeSubImageBtn = document.getElementById('removeSubImageBtn');
+        const subStatusMsg = document.getElementById('subStatusMsg');
+        const submitPostBtn = document.getElementById('submitPostBtn');
+        let selectedSubmissionImageFile = null;
+
+        function openSubmissionModal() {
+            if (!freeSubmitModal) return;
+            freeSubmitModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (subStatusMsg) subStatusMsg.style.display = 'none';
+        }
+
+        function closeSubmissionModal() {
+            if (!freeSubmitModal) return;
+            freeSubmitModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        if (openSubmitModalBtn) openSubmitModalBtn.addEventListener('click', openSubmissionModal);
+        if (openSubmitModalSidebarBtn) openSubmitModalSidebarBtn.addEventListener('click', openSubmissionModal);
+        if (closeSubmitModalBtn) closeSubmitModalBtn.addEventListener('click', closeSubmissionModal);
+
+        if (freeSubmitModal) {
+            freeSubmitModal.addEventListener('click', (e) => {
+                if (e.target === freeSubmitModal) closeSubmissionModal();
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && freeSubmitModal && freeSubmitModal.style.display === 'flex') {
+                closeSubmissionModal();
+            }
+        });
+
+        // Dropzone & File Input
+        if (subDropzone && subImageInput) {
+            subDropzone.addEventListener('click', () => subImageInput.click());
+            subDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                subDropzone.style.borderColor = '#ea580c';
+                subDropzone.style.background = 'rgba(234, 88, 12, 0.08)';
+            });
+            subDropzone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                subDropzone.style.borderColor = 'var(--border-color)';
+                subDropzone.style.background = 'var(--bg-card)';
+            });
+            subDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                subDropzone.style.borderColor = 'var(--border-color)';
+                subDropzone.style.background = 'var(--bg-card)';
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleSubImageSelection(e.dataTransfer.files[0]);
+                }
+            });
+            subImageInput.addEventListener('change', () => {
+                if (subImageInput.files && subImageInput.files[0]) {
+                    handleSubImageSelection(subImageInput.files[0]);
+                }
+            });
+        }
+
+        function handleSubImageSelection(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('කරුණාකර වලංගු පින්තූර ගොනුවක් (Image file) තෝරන්න.');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('පින්තූරයේ ප්‍රමාණය 5MB ට වඩා අඩු විය යුතුය.');
+                return;
+            }
+            selectedSubmissionImageFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (subImagePreview) subImagePreview.src = e.target.result;
+                if (subImagePreviewContainer) subImagePreviewContainer.style.display = 'block';
+                if (subDropzone) subDropzone.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (removeSubImageBtn) {
+            removeSubImageBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectedSubmissionImageFile = null;
+                if (subImageInput) subImageInput.value = '';
+                if (subImagePreview) subImagePreview.src = '';
+                if (subImagePreviewContainer) subImagePreviewContainer.style.display = 'none';
+                if (subDropzone) subDropzone.style.display = 'block';
+            });
+        }
+
+        // Form Submit
+        if (visitorSubmissionForm) {
+            visitorSubmissionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const subTypeEl = document.querySelector('input[name="subType"]:checked');
+                const subType = subTypeEl ? subTypeEl.value : 'ad';
+                const subCategory = document.getElementById('subCategory')?.value || 'general';
+                const subTitle = document.getElementById('subTitle')?.value.trim();
+                const subDescription = document.getElementById('subDescription')?.value.trim();
+                const subContact = document.getElementById('subContact')?.value.trim();
+
+                if (!subTitle || !subDescription) {
+                    alert('කරුණාකර ශීර්ෂය සහ විස්තරය ඇතුළත් කරන්න.');
+                    return;
+                }
+
+                if (submitPostBtn) {
+                    submitPostBtn.disabled = true;
+                    submitPostBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> යොමු කරමින් පවතී (Submitting)...';
+                }
+
+                let imageUrl = '';
+
+                try {
+                    // Upload image to Supabase storage bucket 'news' if provided
+                    if (selectedSubmissionImageFile) {
+                        try {
+                            const fileExt = selectedSubmissionImageFile.name.split('.').pop();
+                            const cleanName = selectedSubmissionImageFile.name.replace(/[^a-zA-Z0-9]/g, '_');
+                            const fileName = `submissions/${Date.now()}_${cleanName}.${fileExt}`;
+
+                            const { data: uploadData, error: uploadError } = await supabase
+                                .storage
+                                .from('news')
+                                .upload(fileName, selectedSubmissionImageFile, {
+                                    cacheControl: '3600',
+                                    upsert: false
+                                });
+
+                            if (!uploadError && uploadData) {
+                                const { data: publicData } = supabase
+                                    .storage
+                                    .from('news')
+                                    .getPublicUrl(fileName);
+                                imageUrl = publicData?.publicUrl || '';
+                            } else {
+                                console.warn('Storage upload error, using base64 preview if available:', uploadError);
+                                if (subImagePreview && subImagePreview.src.startsWith('data:')) {
+                                    imageUrl = subImagePreview.src.length < 500000 ? subImagePreview.src : '';
+                                }
+                            }
+                        } catch (imgErr) {
+                            console.warn('Image upload exception:', imgErr);
+                        }
+                    }
+
+                    // Insert into Supabase submissions table
+                    const { error } = await supabase
+                        .from('submissions')
+                        .insert([
+                            {
+                                type: subType,
+                                category: subCategory,
+                                title: subTitle,
+                                description: subDescription,
+                                image_url: imageUrl,
+                                contact_info: subContact,
+                                status: 'pending'
+                            }
+                        ]);
+
+                    if (error) {
+                        console.error('Submission insert error:', error);
+                        if (subStatusMsg) {
+                            subStatusMsg.style.display = 'block';
+                            subStatusMsg.style.background = '#fee2e2';
+                            subStatusMsg.style.color = '#991b1b';
+                            subStatusMsg.style.border = '1px solid #fecaca';
+                            subStatusMsg.textContent = 'යොමු කිරීමේ දෝෂයක් ඇති විය: ' + (error.message || 'නැවත උත්සාහ කරන්න.');
+                        }
+                    } else {
+                        // Success!
+                        if (subStatusMsg) {
+                            subStatusMsg.style.display = 'block';
+                            subStatusMsg.style.background = '#dcfce7';
+                            subStatusMsg.style.color = '#166534';
+                            subStatusMsg.style.border = '1px solid #bbf7d0';
+                            subStatusMsg.innerHTML = '<i class="fas fa-check-circle"></i> <strong>සාර්ථකයි!</strong> ඔබගේ ' + (subType === 'ad' ? 'දැන්වීම' : 'පුවත') + ' අපගේ පරීක්ෂණ මණ්ඩලය වෙත යොමු කරන ලදී. අනුමැතියෙන් පසු එය වෙබ් අඩවියේ නොමිලේම සජීවීව පළ කරනු ඇත.';
+                        }
+                        visitorSubmissionForm.reset();
+                        selectedSubmissionImageFile = null;
+                        if (subImagePreviewContainer) subImagePreviewContainer.style.display = 'none';
+                        if (subDropzone) subDropzone.style.display = 'block';
+
+                        setTimeout(() => {
+                            closeSubmissionModal();
+                        }, 4000);
+                    }
+                } catch (err) {
+                    console.error('Submission error:', err);
+                    if (subStatusMsg) {
+                        subStatusMsg.style.display = 'block';
+                        subStatusMsg.style.background = '#fee2e2';
+                        subStatusMsg.style.color = '#991b1b';
+                        subStatusMsg.style.border = '1px solid #fecaca';
+                        subStatusMsg.textContent = 'තාක්ෂණික දෝෂයක් ඇති විය. කරුණාකර සුළු මොහොතකින් නැවත උත්සාහ කරන්න.';
+                    }
+                } finally {
+                    if (submitPostBtn) {
+                        submitPostBtn.disabled = false;
+                        submitPostBtn.innerHTML = '<i class="fas fa-paper-plane"></i> නොමිලේ පළ කරන්න (Submit for Free)';
+                    }
+                }
+            });
+        }
 
         // Boot
         fetchNews();

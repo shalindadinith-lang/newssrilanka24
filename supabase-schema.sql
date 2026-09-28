@@ -131,6 +131,115 @@ drop policy if exists "news_images_admin_delete" on storage.objects;
 create policy "news_images_admin_delete" on storage.objects
   for delete using (bucket_id = 'news' and public.is_admin());
 
+-- Allow visitors to upload images for free submissions into news bucket (path prefix 'submissions/')
+drop policy if exists "news_images_submissions_public_insert" on storage.objects;
+create policy "news_images_submissions_public_insert" on storage.objects
+  for insert with check (bucket_id = 'news');
+
+-- 5) Dynamic Daily Polls table
+create table if not exists public.polls (
+  id         uuid primary key default gen_random_uuid(),
+  question   text not null,
+  options    jsonb not null default '[]'::jsonb,
+  is_active  boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+drop trigger if exists polls_set_updated_at on public.polls;
+create trigger polls_set_updated_at
+  before update on public.polls
+  for each row execute function public.set_updated_at();
+
+alter table public.polls enable row level security;
+
+-- Public can read active polls
+drop policy if exists "polls_public_read" on public.polls;
+create policy "polls_public_read" on public.polls
+  for select using (is_active = true or public.is_admin());
+
+-- Admin has full CRUD on polls
+drop policy if exists "polls_admin_all" on public.polls;
+create policy "polls_admin_all" on public.polls
+  for all using (public.is_admin()) with check (public.is_admin());
+
+-- Public can vote on active polls
+drop policy if exists "polls_public_vote" on public.polls;
+create policy "polls_public_vote" on public.polls
+  for update using (is_active = true) with check (is_active = true);
+
+-- Stored function to increment poll option votes safely
+create or replace function public.vote_poll(p_id uuid, opt_id text)
+returns jsonb
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  updated_options jsonb;
+begin
+  update public.polls
+  set options = (
+    select jsonb_agg(
+      case
+        when elem->>'id' = opt_id then
+          jsonb_set(elem, '{votes}', to_jsonb(coalesce((elem->>'votes')::int, 0) + 1))
+        else elem
+      end
+    )
+    from jsonb_array_elements(options) as elem
+  ),
+  updated_at = now()
+  where id = p_id;
+
+  select options into updated_options from public.polls where id = p_id;
+  return updated_options;
+end;
+$$;
+
+-- Seed default initial poll if table is empty
+insert into public.polls (question, options, is_active)
+select 
+  'ලබන වසරේ ශ්‍රී ලංකා ආර්ථිකයේ වර්ධනය පිළිබඳ ඔබගේ බලාපොරොත්තුව කුමක්ද?',
+  '[
+    {"id": "positive", "text": "📈 ඉතා යහපත් (Positive)", "votes": 45},
+    {"id": "moderate", "text": "⚖️ මධ්‍යස්ථයි (Moderate)", "votes": 35},
+    {"id": "challenging", "text": "📉 අභියෝගාත්මකයි (Challenging)", "votes": 20}
+  ]'::jsonb,
+  true
+where not exists (select 1 from public.polls);
+
+-- 6) Visitor Free Ads & News Submissions table
+create table if not exists public.submissions (
+  id           uuid primary key default gen_random_uuid(),
+  type         text not null default 'ad', -- 'ad' or 'news'
+  title        text not null,
+  description  text default '',
+  content      text default '',
+  image_url    text default '',
+  category     text default 'general',
+  contact_info text default '',
+  status       text not null default 'pending', -- 'pending', 'approved', 'rejected'
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+drop trigger if exists submissions_set_updated_at on public.submissions;
+create trigger submissions_set_updated_at
+  before update on public.submissions
+  for each row execute function public.set_updated_at();
+
+alter table public.submissions enable row level security;
+
+-- Visitors can submit new pending posts
+drop policy if exists "submissions_public_insert" on public.submissions;
+create policy "submissions_public_insert" on public.submissions
+  for insert with check (status = 'pending');
+
+-- Admin has full moderation rights (select, update, delete)
+drop policy if exists "submissions_admin_all" on public.submissions;
+create policy "submissions_admin_all" on public.submissions
+  for all using (public.is_admin()) with check (public.is_admin());
+
 -- =====================================================================
 -- පළමු admin mark කිරීමට (auth.users හි ඇති email එකක්):
 --
