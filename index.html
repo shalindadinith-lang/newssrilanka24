@@ -1,19 +1,4 @@
-Ran command: `Get-ChildItem -Path .`
-Ran command: `Get-ChildItem -Path . -Recurse -Filter "*.html" -ErrorAction SilentlyContinue`
 
-Adsterra දැන්වීම් ජාලයට (Adsterra network) අදාළ සියලුම script tags, containers සහ ad slots සම්පූර්ණයෙන්ම ඉවත් කර, **Google Ads (AdSense) script tag එක සුරක්ෂිතව තබා** සකස් කළ සම්පූර්ණ HTML කේතය (code) පහත දැක්වේ.
-
-### සිදු කරන ලද වෙනස්කම්:
-1. `<head>` හි තිබූ Adsterra popunder සහ network scripts (`profitableratecpmnetwork.com`) ඉවත් කරන ලදී.
-2. `<body>` ආරම්භයේ තිබූ Adsterra Container div එක (`container-92a7664c8a64c05f627ef2d5add9408d`) ඉවත් කරන ලදී.
-3. ඉහළින් තිබූ Adsterra Desktop (728x90) / Mobile (320x50) Banner එක ඉවත් කරන ලදී.
-4. Sidebar එකේ තිබූ Adsterra 300x250 සහ Skyscraper දැන්වීම් කොටස් ඉවත් කරන ලදී.
-5. News Grid එක තුළට සහ Article Reading Modal එක තුළට Adsterra දැන්වීම් inject වන JavaScript කේත කොටස් ඉවත් කරන ලදී.
-6. **Google AdSense** script එක (`ca-pub-9833925311293082`) කිසිදු වෙනසක් නොකර නොවෙනස්ව තබා ඇත.
-
----
-
-```html
 <!DOCTYPE html>
 <html lang="si">
 <head>
@@ -3204,4 +3189,4 @@ Adsterra දැන්වීම් ජාලයට (Adsterra network) අදා�
     </script>
 </body>
 </html>
-```
+
