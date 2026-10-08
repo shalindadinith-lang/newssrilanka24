@@ -1,22 +1,33 @@
+Ran command: `Get-ChildItem -Path .`
+Ran command: `Get-ChildItem -Path . -Recurse -Filter "*.html" -ErrorAction SilentlyContinue`
+
+Adsterra දැන්වීම් ජාලයට (Adsterra network) අදාළ සියලුම script tags, containers සහ ad slots සම්පූර්ණයෙන්ම ඉවත් කර, **Google Ads (AdSense) script tag එක සුරක්ෂිතව තබා** සකස් කළ සම්පූර්ණ HTML කේතය (code) පහත දැක්වේ.
+
+### සිදු කරන ලද වෙනස්කම්:
+1. `<head>` හි තිබූ Adsterra popunder සහ network scripts (`profitableratecpmnetwork.com`) ඉවත් කරන ලදී.
+2. `<body>` ආරම්භයේ තිබූ Adsterra Container div එක (`container-92a7664c8a64c05f627ef2d5add9408d`) ඉවත් කරන ලදී.
+3. ඉහළින් තිබූ Adsterra Desktop (728x90) / Mobile (320x50) Banner එක ඉවත් කරන ලදී.
+4. Sidebar එකේ තිබූ Adsterra 300x250 සහ Skyscraper දැන්වීම් කොටස් ඉවත් කරන ලදී.
+5. News Grid එක තුළට සහ Article Reading Modal එක තුළට Adsterra දැන්වීම් inject වන JavaScript කේත කොටස් ඉවත් කරන ලදී.
+6. **Google AdSense** script එක (`ca-pub-9833925311293082`) කිසිදු වෙනසක් නොකර නොවෙනස්ව තබා ඇත.
+
+---
+
+```html
 <!DOCTYPE html>
 <html lang="si">
 <head>
 
   <!--Google ADS-->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9833925311293082"
-     crossorigin="anonymous"></script>
-
-
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9833925311293082"
      crossorigin="anonymous"></script>
-  
 
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="If+yQS2rXEkSZ5TpcV2n2g" async></script>
     <meta charset="UTF-8">
     <meta name="msvalidate.01" content="B6CDB9BE3897C7D9D5108A6F1527C47B" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>News Sri Lanka 24 | සැබෑ කාලීන සිංහල පුවත් සාරාංශ</title>
-    <meta name="description" content="ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ — දේශීය, ක්‍රීඩා, තාක්ෂණය, ව්‍යාපාර සහ විනෝදාස්වාදය සජීවීව එකම තැනකින්.">
+    <meta name="description" content="ශ්රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ — දේශීය, ක්රීඩා, තාක්ෂණය, ව්යාපාර සහ විනෝදාස්වාදය සජීවීව එකම තැනකින්.">
     <meta name="keywords" content="Sri Lanka News, Sinhala News, News Sri Lanka 24, breaking news sri lanka, ada derana, lankadeepa, sinhala news today">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="google-site-verification" content="VqGkdApWrkfSbCwljGn_263c7kU5GVy7fVPaKKXzC40">
@@ -29,7 +40,7 @@
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:title" content="News Sri Lanka 24 — සැබෑ කාලීන සිංහල පුවත්">
-    <meta property="og:description" content="ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව දැනගන්න.">
+    <meta property="og:description" content="ශ්රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව දැනගන්න.">
     <meta property="og:image" content="https://newssrilanka24.com.lk/og-default.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -42,7 +53,7 @@
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="News Sri Lanka 24 — සැබෑ කාලීන සිංහල පුවත්">
-    <meta name="twitter:description" content="ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව.">
+    <meta name="twitter:description" content="ශ්රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව.">
     <meta name="twitter:image" content="https://newssrilanka24.com.lk/og-default.png">
     <meta name="theme-color" content="#b91c1c">
 
@@ -88,11 +99,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://jwjqhzrdrvqxwcahxmmb.supabase.co" crossorigin>
-
-    <!-- Adsterra Popunder / Social / Network Scripts (Monetization Preserved) -->
-
-    <script src="https://pl31321272.profitableratecpmnetwork.com/68/e7/95/68e795fadd49027611309bafebfbf7ba.js"></script>
-    <script async="async" data-cfasync="false" src="https://pl31321273.profitableratecpmnetwork.com/92a7664c8a64c05f627ef2d5add9408d/invoke.js"></script>
 
     <!-- Google Fonts & Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -486,7 +492,7 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
-        /* ================== ADSTERRA SPONSORED SLOTS ================== */
+        /* ================== SPONSORED SLOTS ================== */
         .ad-slot-wrapper {
             max-width: 1400px;
             margin: 18px auto 0;
@@ -1618,11 +1624,7 @@
     </style>
 </head>
 
-   
 <body>
-    <!-- Adsterra Container (Preserved) -->
-    <div id="container-92a7664c8a64c05f627ef2d5add9408d"></div>
-
     <!-- Top Utility Bar -->
     <div class="top-bar">
         <div class="top-container">
@@ -1690,15 +1692,15 @@
         <div class="nav-container">
             <div class="categories" id="categoriesNav">
                 <button class="cat-btn active" data-cat="all"><i class="fas fa-globe"></i> සියල්ල</button>
-                <button class="cat-btn" data-cat="sri-lanka"><i class="fas fa-flag"></i> ශ්‍රී ලංකා</button>
+                <button class="cat-btn" data-cat="sri-lanka"><i class="fas fa-flag"></i> ශ්රී ලංකා</button>
                 <button class="cat-btn" data-cat="world"><i class="fas fa-earth-asia"></i> ලෝකය</button>
                 <button class="cat-btn" data-cat="technology"><i class="fas fa-microchip"></i> තාක්ෂණය</button>
-                <button class="cat-btn" data-cat="sports"><i class="fas fa-trophy"></i> ක්‍රීඩා</button>
-                <button class="cat-btn" data-cat="business"><i class="fas fa-chart-line"></i> ව්‍යාපාර</button>
+                <button class="cat-btn" data-cat="sports"><i class="fas fa-trophy"></i> ක්රීඩා</button>
+                <button class="cat-btn" data-cat="business"><i class="fas fa-chart-line"></i> ව්යාපාර</button>
                 <button class="cat-btn" data-cat="entertainment"><i class="fas fa-film"></i> විනෝදාස්වාදය</button>
-                <button class="cat-btn" data-cat="education"><i class="fas fa-graduation-cap"></i> අධ්‍යාපනය</button>
-                <button class="cat-btn" data-cat="health"><i class="fas fa-heartbeat"></i> සෞඛ්‍ය</button>
-                <button class="cat-btn" data-cat="general"><i class="fas fa-newspaper"></i> සාමාන්‍ය</button>
+                <button class="cat-btn" data-cat="education"><i class="fas fa-graduation-cap"></i> අධ්යාපනය</button>
+                <button class="cat-btn" data-cat="health"><i class="fas fa-heartbeat"></i> සෞඛ්ය</button>
+                <button class="cat-btn" data-cat="general"><i class="fas fa-newspaper"></i> සාමාන්ය</button>
             </div>
             <div class="lang-selector">
                 <button class="lang-btn active" data-lang="all">All</button>
@@ -1707,39 +1709,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- Top Sponsored Adsterra Banner (728x90 Desktop / 320x50 Mobile) -->
-    <div class="ad-slot-wrapper">
-        <div class="ad-slot">
-            <div class="ad-label">SPONSORED ADVERTISEMENT</div>
-            <!-- Desktop 728x90 -->
-            <div class="ad-desktop">
-                <script>
-                    atOptions = {
-                        'key' : '893aa38ef072c8387fb5371b4cbe2259',
-                        'format' : 'iframe',
-                        'height' : 90,
-                        'width' : 728,
-                        'params' : {}
-                    };
-                </script>
-                <script src="https://www.highrevenueformat.com/893aa38ef072c8387fb5371b4cbe2259/invoke.js"></script>
-            </div>
-            <!-- Mobile 320x50 -->
-            <div class="ad-mobile">
-                <script>
-                    atOptions = {
-                        'key' : 'c8f1e56abb6fe3ab8b3b0ea76f050923',
-                        'format' : 'iframe',
-                        'height' : 50,
-                        'width' : 320,
-                        'params' : {}
-                    };
-                </script>
-                <script src="https://www.highrevenueformat.com/c8f1e56abb6fe3ab8b3b0ea76f050923/invoke.js"></script>
-            </div>
-        </div>
-    </div>
 
     <!-- Featured Hero Slider -->
     <section class="slider-section">
@@ -1782,25 +1751,10 @@
         <aside class="sidebar">
             <!-- Trending Articles Widget -->
             <div class="sidebar-widget">
-                <h3 class="widget-title"><i class="fas fa-fire"></i> ජනප්‍රිය පුවත් (Trending)</h3>
+                <h3 class="widget-title"><i class="fas fa-fire"></i> ජනප්රිය පුවත් (Trending)</h3>
                 <div class="trending-list" id="trendingList">
                     <!-- Populated dynamically -->
                 </div>
-            </div>
-
-            <!-- Adsterra 300x250 Sidebar Banner -->
-            <div class="ad-slot" style="margin: 0;">
-                <div class="ad-label">SPONSORED</div>
-                <script>
-                    atOptions = {
-                        'key' : 'dec4e43f04017b7d07d7deee36dc3e4a',
-                        'format' : 'iframe',
-                        'height' : 250,
-                        'width' : 300,
-                        'params' : {}
-                    };
-                </script>
-                <script src="https://www.highrevenueformat.com/dec4e43f04017b7d07d7deee36dc3e4a/invoke.js"></script>
             </div>
 
             <!-- Free Ads / News Promotion Banner in Sidebar -->
@@ -1818,7 +1772,7 @@
             <!-- Dynamic Daily Poll Widget -->
             <div class="sidebar-widget" id="pollWidget">
                 <h3 class="widget-title"><i class="fas fa-square-poll-vertical"></i> දවසේ මත විමසුම</h3>
-                <p class="poll-question" id="pollQuestionText">ලබන වසරේ ශ්‍රී ලංකා ආර්ථිකයේ වර්ධනය පිළිබඳ ඔබගේ බලාපොරොත්තුව කුමක්ද?</p>
+                <p class="poll-question" id="pollQuestionText">ලබන වසරේ ශ්රී ලංකා ආර්ථිකයේ වර්ධනය පිළිබඳ ඔබගේ බලාපොරොත්තුව කුමක්ද?</p>
                 <div class="poll-options" id="pollOptions">
                     <label class="poll-option-label" data-choice="positive">
                         <div class="poll-bar" id="pollBar-positive" style="width: 0%;"></div>
@@ -1829,7 +1783,7 @@
                     <label class="poll-option-label" data-choice="moderate">
                         <div class="poll-bar" id="pollBar-moderate" style="width: 0%;"></div>
                         <input type="radio" name="pollVote" value="moderate">
-                        <span class="poll-option-text">⚖️ මධ්‍යස්ථයි (Moderate)</span>
+                        <span class="poll-option-text">⚖️ මධ්යස්ථයි (Moderate)</span>
                         <span class="poll-pct" id="pollPct-moderate">35%</span>
                     </label>
                     <label class="poll-option-label" data-choice="challenging">
@@ -1840,27 +1794,12 @@
                     </label>
                 </div>
                 <button class="poll-btn" id="pollVoteBtn">ඡන්දය දෙන්න (Vote)</button>
-                <p class="poll-msg" id="pollMsg">සමස්ත ප්‍රතිචාර: <strong id="pollTotalCount">1,842</strong></p>
-            </div>
-
-            <!-- Adsterra 468x60 / 160x600 Skyscraper Preserved Placement -->
-            <div class="ad-slot" style="margin: 0;">
-                <div class="ad-label">SPONSORED</div>
-                <script>
-                    atOptions = {
-                        'key' : 'f80e84d44410640e82278da0f58669be',
-                        'format' : 'iframe',
-                        'height' : 60,
-                        'width' : 468,
-                        'params' : {}
-                    };
-                </script>
-                <script src="https://www.highrevenueformat.com/f80e84d44410640e82278da0f58669be/invoke.js"></script>
+                <p class="poll-msg" id="pollMsg">සමස්ත ප්රතිචාර: <strong id="pollTotalCount">1,842</strong></p>
             </div>
         </aside>
     </div>
 
-    <!-- Article Reader Modal (Modernized with Progress Bar, Reactions, Reading Time, AI, Share & Related) -->
+    <!-- Article Reader Modal -->
     <div id="newsModal" class="modal">
         <div class="modal-content">
             <div class="reading-progress-bar" id="readingProgressBar"></div>
@@ -1900,22 +1839,22 @@
                 </div>
 
                 <div class="form-group-custom">
-                    <label>ප්‍රවර්ගය (Category)</label>
+                    <label>ප්රවර්ගය (Category)</label>
                     <select id="subCategory">
-                        <option value="general">සාමාන්‍ය (General)</option>
-                        <option value="sri-lanka">ශ්‍රී ලංකා (Sri Lanka)</option>
-                        <option value="business">ව්‍යාපාර / රැකියා (Business / Jobs)</option>
+                        <option value="general">සාමාන්ය (General)</option>
+                        <option value="sri-lanka">ශ්රී ලංකා (Sri Lanka)</option>
+                        <option value="business">ව්යාපාර / රැකියා (Business / Jobs)</option>
                         <option value="technology">තාක්ෂණය (Technology)</option>
-                        <option value="education">අධ්‍යාපනය (Education)</option>
-                        <option value="health">සෞඛ්‍ය (Health)</option>
-                        <option value="sports">ක්‍රීඩා (Sports)</option>
+                        <option value="education">අධ්යාපනය (Education)</option>
+                        <option value="health">සෞඛ්ය (Health)</option>
+                        <option value="sports">ක්රීඩා (Sports)</option>
                         <option value="entertainment">විනෝදාස්වාදය (Entertainment)</option>
                     </select>
                 </div>
 
                 <div class="form-group-custom">
                     <label>ශීර්ෂය (Title) *</label>
-                    <input type="text" id="subTitle" placeholder="ඔබගේ දැන්වීමේ හෝ පුවතේ ප්‍රධාන මාතෘකාව..." required>
+                    <input type="text" id="subTitle" placeholder="ඔබගේ දැන්වීමේ හෝ පුවතේ ප්රධාන මාතෘකාව..." required>
                 </div>
 
                 <div class="form-group-custom">
@@ -1965,12 +1904,12 @@
     <footer>
         <div class="footer-container">
             <div class="footer-brand">News Sri Lanka <span>24</span></div>
-            <p class="footer-desc">ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව සහ විශ්වාසනීයව ඔබ වෙත ගෙන එන ඩිජිටල් පුවත් වේදිකාව.</p>
+            <p class="footer-desc">ශ්රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව සහ විශ්වාසනීයව ඔබ වෙත ගෙන එන ඩිජිටල් පුවත් වේදිකාව.</p>
             <p class="footer-copy">© 2026 newssrilanka24.com.lk. All rights reserved. Designed for speed, SEO, and engagement.</p>
         </div>
     </footer>
 
-    <!-- Main Application Logic (Preserves Supabase + RSS + Routing + AI Summary) -->
+    <!-- Main Application Logic -->
     <script type="module">
         import { supabase } from './supabase-config.js';
 
@@ -1986,15 +1925,15 @@
         ];
 
         const CATEGORY_LABELS = {
-            'general': 'සාමාන්‍ය',
-            'sri-lanka': 'ශ්‍රී ලංකා',
+            'general': 'සාමාන්ය',
+            'sri-lanka': 'ශ්රී ලංකා',
             'world': 'ලෝකය',
             'technology': 'තාක්ෂණය',
-            'sports': 'ක්‍රීඩා',
-            'business': 'ව්‍යාපාර',
+            'sports': 'ක්රීඩා',
+            'business': 'ව්යාපාර',
             'entertainment': 'විනෝදාස්වාදය',
-            'education': 'අධ්‍යාපනය',
-            'health': 'සෞඛ්‍ය'
+            'education': 'අධ්යාපනය',
+            'health': 'සෞඛ්ය'
         };
 
         let allArticles = [];
@@ -2008,9 +1947,9 @@
 
         // Meta Defaults
         const DEFAULT_TITLE = 'News Sri Lanka 24 | සැබෑ කාලීන සිංහල පුවත් සාරාංශ';
-        const DEFAULT_DESCRIPTION = 'ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ — දේශීය, ක්‍රීඩා, තාක්ෂණය, ව්‍යාපාර සහ විනෝදාස්වාදය සජීවීව එකම තැනකින්.';
+        const DEFAULT_DESCRIPTION = 'ශ්රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ — දේශීය, ක්රීඩා, තාක්ෂණය, ව්යාපාර සහ විනෝදාස්වාදය සජීවීව එකම තැනකින්.';
         const DEFAULT_OG_TITLE = 'News Sri Lanka 24 — සැබෑ කාලීන සිංහල පුවත්';
-        const DEFAULT_OG_DESC = 'ශ්‍රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව දැනගන්න.';
+        const DEFAULT_OG_DESC = 'ශ්රී ලංකාවේ සහ ලෝකයේ නවතම සිංහල පුවත් සාරාංශ සජීවීව දැනගන්න.';
         const DEFAULT_OG_IMAGE = 'https://newssrilanka24.com.lk/og-default.png';
         const DEFAULT_OG_URL = 'https://newssrilanka24.com.lk/';
         const SITE_NAME = 'News Sri Lanka 24';
@@ -2050,7 +1989,7 @@
             return date.toLocaleDateString('si-LK');
         }
 
-        // --- Slug & URL Helpers (Preserved algorithm for compatibility) ---
+        // --- Slug & URL Helpers ---
         function makeSlug(title, salt) {
             const base = String(title || 'news')
                 .toLowerCase()
@@ -2139,13 +2078,13 @@
         function detectCategory(text) {
             const lower = String(text || '').toLowerCase();
             if(lower.includes('ටෙක්') || lower.includes('තාක්ෂණ') || lower.includes('technology') || lower.includes('smartphone') || lower.includes('phone') || lower.includes('app')) return 'technology';
-            if(lower.includes('ක්‍රීඩා') || lower.includes('තරග') || lower.includes('sports') || lower.includes('cricket')) return 'sports';
-            if(lower.includes('ව්‍යාපාර') || lower.includes('ආර්ථික') || lower.includes('business') || lower.includes('economy') || lower.includes('market')) return 'business';
+            if(lower.includes('ක්රීඩා') || lower.includes('තරග') || lower.includes('sports') || lower.includes('cricket')) return 'sports';
+            if(lower.includes('ව්යාපාර') || lower.includes('ආර්ථික') || lower.includes('business') || lower.includes('economy') || lower.includes('market')) return 'business';
             if(lower.includes('ලෝක') || lower.includes('විදෙස්') || lower.includes('world') || lower.includes('international')) return 'world';
             if(lower.includes('සිනමා') || lower.includes('රංගන') || lower.includes('ගායන') || lower.includes('entertainment') || lower.includes('film')) return 'entertainment';
-            if(lower.includes('අධ්‍යාපන') || lower.includes('පාසල්') || lower.includes('විශ්වවිද්‍යාල') || lower.includes('education')) return 'education';
-            if(lower.includes('සෞඛ්‍ය') || lower.includes('රෝග') || lower.includes('health') || lower.includes('hospital')) return 'health';
-            if(lower.includes('ශ්‍රී ලංකා') || lower.includes('ශ්‍රී ලංකාව') || lower.includes('sri lanka')) return 'sri-lanka';
+            if(lower.includes('අධ්යාපන') || lower.includes('පාසල්') || lower.includes('විශ්වවිද්යාල') || lower.includes('education')) return 'education';
+            if(lower.includes('සෞඛ්ය') || lower.includes('රෝග') || lower.includes('health') || lower.includes('hospital')) return 'health';
+            if(lower.includes('ශ්රී ලංකා') || lower.includes('ශ්රී ලංකාව') || lower.includes('sri lanka')) return 'sri-lanka';
             return 'general';
         }
 
@@ -2340,7 +2279,7 @@
             });
         }
 
-        // --- Render Main News Feed with Infinite/Load More ---
+        // --- Render Main News Feed ---
         function renderNewsGrid(append = false) {
             let list = filteredArticles;
             if (currentCategory !== 'all') list = list.filter(a => a.category === currentCategory);
@@ -2372,33 +2311,10 @@
 
             const sliceToShow = list.slice(append ? visibleCount - PAGE_STEP : 0, visibleCount);
 
-            sliceToShow.forEach((article, index) => {
-                // In-feed ad unit after every 6th card (Monetization accommodation)
-                if (append === false && index === 6) {
-                    const adCard = document.createElement('div');
-                    adCard.className = 'ad-slot';
-                    adCard.style.gridColumn = '1 / -1';
-                    adCard.innerHTML = `
-                        <div class="ad-label">SPONSORED</div>
-                        <div style="margin: 0 auto;">
-                            <script>
-                                atOptions = {
-                                    'key' : 'dec4e43f04017b7d07d7deee36dc3e4a',
-                                    'format' : 'iframe',
-                                    'height' : 250,
-                                    'width' : 300,
-                                    'params' : {}
-                                };
-                            <\/script>
-                            <script src="https://www.highrevenueformat.com/dec4e43f04017b7d07d7deee36dc3e4a/invoke.js"><\/script>
-                        </div>
-                    `;
-                    grid.appendChild(adCard);
-                }
-
+            sliceToShow.forEach((article) => {
                 const card = document.createElement('article');
                 card.className = 'news-card';
-                const catLabel = CATEGORY_LABELS[article.category] || article.category || 'සාමාන්‍ය';
+                const catLabel = CATEGORY_LABELS[article.category] || article.category || 'සාමාන්ය';
                 const ago = timeAgo(article.pubDate);
                 const readTime = getReadingTime(article.content || article.description, article.language);
 
@@ -2557,7 +2473,7 @@
 
             container.innerHTML = `
                 <div class="reactions-box">
-                    <div class="reactions-title"><i class="fas fa-heart-pulse"></i> මෙම පුවත ගැන ඔබගේ ප්‍රතිචාරය දක්වන්න</div>
+                    <div class="reactions-title"><i class="fas fa-heart-pulse"></i> මෙම පුවත ගැන ඔබගේ ප්රතිචාරය දක්වන්න</div>
                     <div class="reactions-btns">
                         ${items.map(it => {
                             const isAct = data.userChoice === it.type ? 'user-reacted' : '';
@@ -2575,7 +2491,7 @@
             `;
         }
 
-        // --- Dynamic Daily Poll Management (Supabase connected + LocalStorage) ---
+        // --- Dynamic Daily Poll Management ---
         let currentPollData = null;
 
         async function initDynamicPoll() {
@@ -2593,7 +2509,6 @@
                     .maybeSingle();
 
                 if (error || !data) {
-                    // Fallback to initial local poll if table not yet populated
                     initFallbackPoll();
                     return;
                 }
@@ -2671,7 +2586,6 @@
             });
 
             try {
-                // Try stored function first for atomic increment
                 const { data: rpcData, error: rpcErr } = await supabase.rpc('vote_poll', {
                     p_id: poll.id,
                     opt_id: chosenId
@@ -2753,7 +2667,7 @@
             const shareUrl = SITE + '/article/' + articleSlug + '/';
             const shareTitle = article.title;
             const date = article.pubDate ? new Date(article.pubDate).toLocaleDateString('si-LK', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-            const catLabel = CATEGORY_LABELS[article.category] || article.category || 'සාමාන්‍ය';
+            const catLabel = CATEGORY_LABELS[article.category] || article.category || 'සාමාන්ය';
             const author = article.author || 'News Sri Lanka 24';
             const readTime = getReadingTime(article.content || article.description, article.language);
 
@@ -2789,24 +2703,9 @@
 
                 ${article.description ? `<p class="article-lead">${article.description}</p>` : ''}
 
-                <!-- Adsterra In-Article Unit (Monetization accommodation) -->
-                <div class="ad-slot" style="margin: 20px 0;">
-                    <div class="ad-label">SPONSORED</div>
-                    <script>
-                        atOptions = {
-                            'key' : 'dec4e43f04017b7d07d7deee36dc3e4a',
-                            'format' : 'iframe',
-                            'height' : 250,
-                            'width' : 300,
-                            'params' : {}
-                        };
-                    <\/script>
-                    <script src="https://www.highrevenueformat.com/dec4e43f04017b7d07d7deee36dc3e4a/invoke.js"><\/script>
-                </div>
-
                 ${article.content ? `<div class="full-article-content">${article.content}</div>` : ''}
 
-                <!-- AI Summary Button (Pollinations.ai preserved) -->
+                <!-- AI Summary Button -->
                 <div class="ai-summary-wrap">
                     <button id="aiSummaryBtn" class="ai-summary-btn">
                         <i class="fas fa-wand-magic-sparkles"></i> AI පුවත් සාරාංශය (Summarize)
@@ -2917,7 +2816,7 @@
             modalScrollBody.scrollTop = 0;
         }
 
-        // --- AI Summary Fetcher (Pollinations.ai) ---
+        // --- AI Summary Fetcher ---
         async function getAISummary(text, callback) {
             const shortText = String(text || '').substring(0, 800);
             const prompt = `කෙටියෙන් සිංහලෙන් සාරාංශ කරන්න: ${shortText}`;
@@ -3162,7 +3061,7 @@
                 return;
             }
             if (file.size > 5 * 1024 * 1024) {
-                alert('පින්තූරයේ ප්‍රමාණය 5MB ට වඩා අඩු විය යුතුය.');
+                alert('පින්තූරයේ ප්රමාණය 5MB ට වඩා අඩු විය යුතුය.');
                 return;
             }
             selectedSubmissionImageFile = file;
@@ -3211,7 +3110,6 @@
                 let imageUrl = '';
 
                 try {
-                    // Upload image to Supabase storage bucket 'news' if provided
                     if (selectedSubmissionImageFile) {
                         try {
                             const fileExt = selectedSubmissionImageFile.name.split('.').pop();
@@ -3243,7 +3141,6 @@
                         }
                     }
 
-                    // Insert into Supabase submissions table
                     const { error } = await supabase
                         .from('submissions')
                         .insert([
@@ -3268,7 +3165,6 @@
                             subStatusMsg.textContent = 'යොමු කිරීමේ දෝෂයක් ඇති විය: ' + (error.message || 'නැවත උත්සාහ කරන්න.');
                         }
                     } else {
-                        // Success!
                         if (subStatusMsg) {
                             subStatusMsg.style.display = 'block';
                             subStatusMsg.style.background = '#dcfce7';
@@ -3308,3 +3204,4 @@
     </script>
 </body>
 </html>
+```
