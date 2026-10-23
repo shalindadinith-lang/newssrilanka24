@@ -2132,18 +2132,117 @@
             localStorage.setItem('theme', isDarkNow ? 'dark' : 'light');
         });
 
-        // --- Fetch Feeds (Supabase + RSS) ---
+        // --- Helper: Convert Blogger entry to Standard Item ---
+        function bloggerEntryToItem(entry) {
+            const title = (entry.title && entry.title.$t) || '';
+            const pubDate = (entry.published && entry.published.$t) || '';
+            const altLink = (entry.link || []).find(l => l.rel === 'alternate');
+            const link = altLink ? altLink.href : '';
+            const rawContent = (entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || '';
+
+            let thumbnail = '';
+            if (entry['media$thumbnail'] && entry['media$thumbnail'].url) {
+                thumbnail = entry['media$thumbnail'].url.replace(/\/s72(-[a-z0-9_-]+)?\//, '/w800/');
+            }
+            if (!thumbnail) {
+                const imgMatch = rawContent.match(/<img[^>]+src=["']([^"']+)["']/i);
+                if (imgMatch) thumbnail = imgMatch[1];
+            }
+            if (!thumbnail) thumbnail = 'https://via.placeholder.com/800x400?text=News';
+
+            const desc = rawContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 240);
+
+            return {
+                title: title.trim(),
+                link: link,
+                pubDate: pubDate,
+                description: desc,
+                thumbnail: thumbnail,
+                content: rawContent
+            };
+        }
+
+        // --- Fetch Lanka C News live via JSONP (bypasses browser CORS completely) ---
+        function fetchLankaCNewsJSONP() {
+            return new Promise((resolve) => {
+                const cbName = 'lankacnews_cb_' + Math.floor(Math.random() * 1000000);
+                const script = document.createElement('script');
+                let done = false;
+                const timer = setTimeout(() => {
+                    if (!done) {
+                        done = true;
+                        cleanup();
+                        resolve([]);
+                    }
+                }, 8000);
+                function cleanup() {
+                    try { delete window[cbName]; } catch(_) {}
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+                window[cbName] = function(data) {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    cleanup();
+                    try {
+                        const entries = (data && data.feed && data.feed.entry) || [];
+                        const items = entries.map(bloggerEntryToItem).filter(i => i.title && i.link);
+                        resolve(items);
+                    } catch(e) {
+                        resolve([]);
+                    }
+                };
+                script.onerror = function() {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    cleanup();
+                    resolve([]);
+                };
+                script.src = 'https://www.lankacnews.com/feeds/posts/default?alt=json-in-script&callback=' + cbName + '&max-results=50';
+                document.head.appendChild(script);
+            });
+        }
+
+        // --- Fetch Feeds (Supabase + Lanka C News RSS/JSON) ---
         async function fetchAllFeeds() {
             let allItems = [];
+
+            // 1. Same-origin static cache (instant <50ms load, zero CORS, kept updated by GitHub Actions)
+            try {
+                const res = await fetch('./lankacnews.json', { cache: 'no-cache' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length) {
+                        allItems = allItems.concat(data);
+                    }
+                }
+            } catch(e) {
+                console.warn('Lanka C News local cache skipped:', e);
+            }
+
+            // 2. Direct real-time Blogger JSONP (fetches newest articles immediately with zero CORS block)
+            try {
+                const liveItems = await fetchLankaCNewsJSONP();
+                if (Array.isArray(liveItems) && liveItems.length) {
+                    allItems = allItems.concat(liveItems);
+                }
+            } catch(e) {
+                console.warn('Lanka C News JSONP failed:', e);
+            }
+
+            // 3. Fallback to external RSS feeds configured in RSS_FEEDS (if any)
             for (let feedUrl of RSS_FEEDS) {
                 try {
                     const response = await fetch(feedUrl);
+                    if (!response.ok) continue;
                     const data = await response.json();
                     if (data && data.items) allItems = allItems.concat(data.items);
                 } catch(e) {
-                    console.warn('RSS feed failed:', feedUrl);
+                    // Suppress warning
                 }
             }
+
             const uniqueMap = new Map();
             allItems.forEach(item => {
                 if (item && item.link && !uniqueMap.has(item.link)) uniqueMap.set(item.link, item);
