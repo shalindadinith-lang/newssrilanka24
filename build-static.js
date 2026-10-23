@@ -193,24 +193,135 @@ async function fetchPublishedArticles(supabase) {
   return Array.isArray(data) ? data : [];
 }
 
+
+function bloggerEntryToItem(entry) {
+  const title = (entry.title && entry.title.$t) || '';
+  const pubDate = (entry.published && entry.published.$t) || '';
+  const altLink = (entry.link || []).find((l) => l.rel === 'alternate');
+  const link = altLink ? altLink.href : '';
+  const rawContent = (entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || '';
+
+  let thumbnail = '';
+  if (entry['media$thumbnail'] && entry['media$thumbnail'].url) {
+    thumbnail = entry['media$thumbnail'].url.replace(/\/s72(-[a-z0-9_-]+)?\//, '/w800/');
+  }
+  if (!thumbnail) {
+    const imgMatch = rawContent.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (imgMatch) thumbnail = imgMatch[1];
+  }
+  if (!thumbnail) thumbnail = PLACEHOLDER_IMG;
+
+  const desc = stripHtml(rawContent).replace(/\s+/g, ' ').trim().slice(0, 240);
+
+  return {
+    title: title.trim(),
+    link: link,
+    pubDate: parseDateISO(pubDate),
+    description: desc,
+    thumbnail: thumbnail,
+    content: rawContent
+  };
+}
+
+function parseRssXml(xml) {
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+  let match;
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemBlock = match[1];
+    const getTag = (tag) => {
+      const m = itemBlock.match(new RegExp(`<${tag}[^>]*>(<!\[CDATA\[([\s\S]*?)\]\]>|([\s\S]*?))<\/${tag}>`, 'i'));
+      if (!m) return '';
+      return (m[2] !== undefined ? m[2] : m[3] || '').trim();
+    };
+    const title = getTag('title');
+    const link = getTag('link');
+    const pubDate = getTag('pubDate');
+    const description = getTag('description');
+    const content = getTag('content:encoded') || description;
+
+    let thumbnail = '';
+    const thumbMatch = itemBlock.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i) ||
+                       itemBlock.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+    if (thumbMatch) thumbnail = thumbMatch[1];
+    if (!thumbnail) {
+      const imgM = (content || description).match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (imgM) thumbnail = imgM[1];
+    }
+    if (thumbnail && thumbnail.includes('/s72')) {
+      thumbnail = thumbnail.replace(/\/s72(-[a-z0-9_-]+)?\//, '/w800/');
+    }
+
+    if (title && link) {
+      items.push({
+        title: title.trim(),
+        link: link,
+        pubDate: parseDateISO(pubDate),
+        description: stripHtml(description).replace(/\s+/g, ' ').trim().slice(0, 240),
+        thumbnail: thumbnail || PLACEHOLDER_IMG,
+        content: content
+      });
+    }
+  }
+  return items;
+}
+
+
 async function fetchRssItems() {
   let allItems = [];
+
+  // 1. Direct Lanka C News Blogger JSON API (up to 50 latest articles, zero third-party proxy)
+  try {
+    const res = await fetch("https://www.lankacnews.com/feeds/posts/default?alt=json&max-results=50", {
+      headers: { "User-Agent": "NewsSriLanka24-StaticBuilder/1.0" }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const entries = (data && data.feed && data.feed.entry) || [];
+      const parsed = entries.map(bloggerEntryToItem).filter((i) => i.title && i.link);
+      console.log("Lanka C News (Blogger JSON): fetched " + parsed.length + " articles");
+      allItems = allItems.concat(parsed);
+    } else {
+      console.warn("Lanka C News JSON returned HTTP " + res.status);
+    }
+  } catch (e) {
+    console.warn("Lanka C News JSON fetch failed: " + e.message);
+  }
+
+  // 2. Fallback to direct Lanka C News RSS XML feed
+  if (allItems.length === 0) {
+    try {
+      const res = await fetch("https://www.lankacnews.com/feeds/posts/default?alt=rss", {
+        headers: { "User-Agent": "NewsSriLanka24-StaticBuilder/1.0" }
+      });
+      if (res.ok) {
+        const xml = await res.text();
+        const parsed = parseRssXml(xml);
+        console.log("Lanka C News (Blogger XML fallback): fetched " + parsed.length + " articles");
+        allItems = allItems.concat(parsed);
+      }
+    } catch (e) {
+      console.warn("Lanka C News XML fallback failed: " + e.message);
+    }
+  }
+
+  // 3. Additional feeds from RSS_FEEDS (if any)
   for (const feedUrl of RSS_FEEDS) {
     try {
       const response = await fetch(feedUrl);
-      if (!response.ok) throw new Error("HTTP " + response.status);
+      if (!response.ok) continue;
       const data = await response.json();
       if (data && Array.isArray(data.items)) allItems = allItems.concat(data.items);
-    } catch (e) {
-      console.warn("RSS feed failed (" + feedUrl + "): " + e.message);
-    }
+    } catch (_) {}
   }
+
   const unique = new Map();
   allItems.forEach((item) => {
     if (item && item.link && !unique.has(item.link)) unique.set(item.link, item);
   });
   return Array.from(unique.values());
 }
+
 
 function rssItemToRow(item) {
   const link = item.link || "";
@@ -1246,6 +1357,10 @@ async function main() {
   const sitemapPath = path.join(ROOT, "sitemap.xml");
   const sitemapChanged = writeFileIfChanged("sitemap.xml", renderSitemap(articles, todayISO()));
   console.log("Sitemap:", sitemapChanged ? "updated (" + articles.length + " article URLs)" : "unchanged");
+
+  const lankaCache = JSON.stringify(rssItems, null, 2);
+  const lankaChanged = writeFileIfChanged("lankacnews.json", lankaCache);
+  console.log("Lanka C News cache (lankacnews.json):", lankaChanged ? "updated (" + rssItems.length + " items)" : "unchanged");
 
   const buildDateRFC = new Date().toUTCString();
   const rssXml = renderRssFeed(articles, buildDateRFC);
