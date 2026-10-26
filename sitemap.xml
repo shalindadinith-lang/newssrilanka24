@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://newssrilanka24.com.lk/</loc>
-    <lastmod>2026-10-25</lastmod>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -183,6 +183,12 @@
   <url>
     <loc>https://newssrilanka24.com.lk/article/mediatek-unveils-new-smartphone-chip-with-2nm-technology-mu2olznv/</loc>
     <lastmod>2026-09-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://newssrilanka24.com.lk/article/ඇමෙරිකා-ප්-රහාරක-තර්ජනය-හමුවේ-ඉරාන-වැසියෝ-දැඩි-බියෙන්-ආහාර-ඉ-kcrhz/</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -476,12 +482,6 @@
   </url>
   <url>
     <loc>https://newssrilanka24.com.lk/article/පොලිස්පතිට-එරෙහිව-අල්ලස්-කොමිසමට-පැමිණිල්ලක්-v1x7u/</loc>
-    <lastmod>2026-10-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://newssrilanka24.com.lk/article/හුලංගමුව-මගේ-උපදේශකයෙකු-ලෙස-වැඩ-කර-නෑ-රනිල්ගෙන්-නිවේදනයක්-lori5/</loc>
     <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
