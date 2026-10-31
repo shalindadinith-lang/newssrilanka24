@@ -2199,7 +2199,7 @@
                     cleanup();
                     resolve([]);
                 };
-                script.src = 'https://www.lankacnews.com/feeds/posts/default?alt=json-in-script&callback=' + cbName + '&max-results=50';
+                script.src = 'https://www.lankacnews.com/feeds/posts/default?alt=json-in-script&callback=' + cbName + '&max-results=48';
                 document.head.appendChild(script);
             });
         }
@@ -2247,7 +2247,7 @@
             allItems.forEach(item => {
                 if (item && item.link && !uniqueMap.has(item.link)) uniqueMap.set(item.link, item);
             });
-            return Array.from(uniqueMap.values());
+            return Array.from(uniqueMap.values()).slice(0, 48);
         }
 
         function detectCategory(text) {
@@ -2313,6 +2313,8 @@
             }
 
             allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+            // Show only the latest 48 news items. No older news beyond 48 items will be shown.
+            allArticles = allArticles.slice(0, 48);
             filteredArticles = [...allArticles];
 
             renderSlider();
@@ -3419,6 +3421,14 @@
 
         // Boot
         fetchNews();
+
+        // Auto-refresh news feed every 5 minutes so it is always up to date with the latest news
+        setInterval(() => {
+            const modal = document.getElementById('articleModal');
+            if (!modal || modal.style.display !== 'flex') {
+                fetchNews();
+            }
+        }, 5 * 60 * 1000);
     </script>
 </body>
 </html>
