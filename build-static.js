@@ -1376,6 +1376,11 @@ async function main() {
   console.log("RSS Feed (rss.xml):", rssChanged ? "updated (" + Math.min(articles.length, 48) + " items)" : "unchanged");
   console.log("RSS Feed (feed.xml):", feedChanged ? "updated (" + Math.min(articles.length, 48) + " items)" : "unchanged");
 
+  try {
+    const { execSync } = require("child_process");
+    execSync("git add rss.xml feed.xml lankacnews.json", { stdio: "ignore" });
+  } catch (_) {}
+
   console.log(
     "Done. Wrote " + written + " article page(s). Generated dir: article/{slug}/index.html"
   );
