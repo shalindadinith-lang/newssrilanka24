@@ -270,9 +270,9 @@ function parseRssXml(xml) {
 async function fetchRssItems() {
   let allItems = [];
 
-  // 1. Direct Lanka C News Blogger JSON API (up to 50 latest articles, zero third-party proxy)
+  // 1. Direct Lanka C News Blogger JSON API (up to 48 latest articles, zero third-party proxy)
   try {
-    const res = await fetch("https://www.lankacnews.com/feeds/posts/default?alt=json&max-results=50", {
+    const res = await fetch("https://www.lankacnews.com/feeds/posts/default?alt=json&max-results=48", {
       headers: { "User-Agent": "NewsSriLanka24-StaticBuilder/1.0" }
     });
     if (res.ok) {
@@ -319,7 +319,7 @@ async function fetchRssItems() {
   allItems.forEach((item) => {
     if (item && item.link && !unique.has(item.link)) unique.set(item.link, item);
   });
-  return Array.from(unique.values());
+  return Array.from(unique.values()).slice(0, 48);
 }
 
 
@@ -1245,7 +1245,7 @@ function toRfc822Date(dateVal) {
 }
 
 function renderRssFeed(articles, buildDate) {
-  const items = articles.slice(0, 50).map((a) => {
+  const items = articles.slice(0, 48).map((a) => {
     const row = a.row || {};
     const url = articleUrl(a.slug);
     const title = (row.title || "Untitled").trim();
@@ -1341,6 +1341,13 @@ async function main() {
   }
   console.log("RSS articles fetched:", rssItems.length, "| total pages:", articles.length);
 
+  // Sort all articles by published_at descending so the newest news items are always at the front
+  articles.sort((a, b) => {
+    const timeA = new Date(a.row.published_at || a.row.created_at || 0).getTime();
+    const timeB = new Date(b.row.published_at || b.row.created_at || 0).getTime();
+    return timeB - timeA;
+  });
+
   let written = 0;
   for (const a of articles) {
     const rel = path.join("article", a.slug, "index.html");
@@ -1358,16 +1365,16 @@ async function main() {
   const sitemapChanged = writeFileIfChanged("sitemap.xml", renderSitemap(articles, todayISO()));
   console.log("Sitemap:", sitemapChanged ? "updated (" + articles.length + " article URLs)" : "unchanged");
 
-  const lankaCache = JSON.stringify(rssItems, null, 2);
+  const lankaCache = JSON.stringify(rssItems.slice(0, 48), null, 2);
   const lankaChanged = writeFileIfChanged("lankacnews.json", lankaCache);
-  console.log("Lanka C News cache (lankacnews.json):", lankaChanged ? "updated (" + rssItems.length + " items)" : "unchanged");
+  console.log("Lanka C News cache (lankacnews.json):", lankaChanged ? "updated (" + Math.min(rssItems.length, 48) + " items)" : "unchanged");
 
   const buildDateRFC = new Date().toUTCString();
   const rssXml = renderRssFeed(articles, buildDateRFC);
   const rssChanged = writeFileIfChanged("rss.xml", rssXml);
   const feedChanged = writeFileIfChanged("feed.xml", rssXml);
-  console.log("RSS Feed (rss.xml):", rssChanged ? "updated (" + Math.min(articles.length, 50) + " items)" : "unchanged");
-  console.log("RSS Feed (feed.xml):", feedChanged ? "updated (" + Math.min(articles.length, 50) + " items)" : "unchanged");
+  console.log("RSS Feed (rss.xml):", rssChanged ? "updated (" + Math.min(articles.length, 48) + " items)" : "unchanged");
+  console.log("RSS Feed (feed.xml):", feedChanged ? "updated (" + Math.min(articles.length, 48) + " items)" : "unchanged");
 
   console.log(
     "Done. Wrote " + written + " article page(s). Generated dir: article/{slug}/index.html"
