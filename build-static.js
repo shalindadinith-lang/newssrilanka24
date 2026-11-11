@@ -176,21 +176,27 @@ function getReadingTime(text, lang = "si") {
 
 // --- REST fetch of published articles -----------------------------------
 async function fetchPublishedArticles(supabase) {
-  const url =
-    supabase.url +
-    "/rest/v1/news?select=*&status=eq.published&order=published_at.desc";
-  const response = await fetch(url, {
-    headers: {
-      apikey: supabase.key,
-      Authorization: "Bearer " + supabase.key,
-      Accept: "application/json"
+  try {
+    const url =
+      supabase.url +
+      "/rest/v1/news?select=*&status=eq.published&order=published_at.desc";
+    const response = await fetch(url, {
+      headers: {
+        apikey: supabase.key,
+        Authorization: "Bearer " + supabase.key,
+        Accept: "application/json"
+      }
+    });
+    if (!response.ok) {
+      console.warn("Supabase fetch warning (status " + response.status + "): " + (await response.text()));
+      return [];
     }
-  });
-  if (!response.ok) {
-    throw new Error("Supabase fetch failed: " + response.status + " " + (await response.text()));
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.warn("Supabase fetch error: " + err.message);
+    return [];
   }
-  const data = await response.json();
-  return Array.isArray(data) ? data : [];
 }
 
 
@@ -267,45 +273,129 @@ function parseRssXml(xml) {
 }
 
 
+function parseAtomXml(xml) {
+  const items = [];
+  const entryRegex = /<entry[\s>]([\s\S]*?)<\/entry>/gi;
+  let match;
+  while ((match = entryRegex.exec(xml)) !== null) {
+    const entryBlock = match[1];
+    const getTag = (tag) => {
+      const m = entryBlock.match(new RegExp(`<${tag}[^>]*>(<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|([\\s\\S]*?))<\\/${tag}>`, 'i'));
+      if (!m) return '';
+      return (m[2] !== undefined ? m[2] : m[3] || '').trim();
+    };
+    const title = getTag('title');
+    const pubDate = getTag('published') || getTag('updated');
+    const linkMatch = entryBlock.match(/<link[^>]+rel=["']alternate["'][^>]+href=["']([^"']+)["']/i) ||
+                      entryBlock.match(/<link[^>]+href=["']([^"']+)["']/i);
+    const link = linkMatch ? linkMatch[1] : '';
+    const rawContent = getTag('content') || getTag('summary');
+
+    let thumbnail = '';
+    const thumbMatch = entryBlock.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i);
+    if (thumbMatch) thumbnail = thumbMatch[1];
+    if (!thumbnail) {
+      const imgM = rawContent.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (imgM) thumbnail = imgM[1];
+    }
+    if (thumbnail && thumbnail.includes('/s72')) {
+      thumbnail = thumbnail.replace(/\/s72(-[a-z0-9_-]+)?\//, '/w800/');
+    }
+
+    if (title && link) {
+      items.push({
+        title: title.trim(),
+        link: link,
+        pubDate: parseDateISO(pubDate),
+        description: stripHtml(rawContent).replace(/\s+/g, ' ').trim().slice(0, 240),
+        thumbnail: thumbnail || PLACEHOLDER_IMG,
+        content: rawContent
+      });
+    }
+  }
+  return items;
+}
+
 async function fetchRssItems() {
   let allItems = [];
 
-  // 1. Direct Lanka C News Blogger JSON API (up to 48 latest articles, zero third-party proxy)
-  try {
-    const res = await fetch("https://www.lankacnews.com/feeds/posts/default?alt=json&max-results=48", {
-      headers: { "User-Agent": "NewsSriLanka24-StaticBuilder/1.0" }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const entries = (data && data.feed && data.feed.entry) || [];
-      const parsed = entries.map(bloggerEntryToItem).filter((i) => i.title && i.link);
-      console.log("Lanka C News (Blogger JSON): fetched " + parsed.length + " articles");
-      allItems = allItems.concat(parsed);
-    } else {
-      console.warn("Lanka C News JSON returned HTTP " + res.status);
+  // Helper to fetch Blogger JSON API
+  async function tryFetchBloggerJson(url, label) {
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": "NewsSriLanka24-StaticBuilder/1.0" }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const entries = (data && data.feed && data.feed.entry) || [];
+        const parsed = entries.map(bloggerEntryToItem).filter((i) => i.title && i.link);
+        if (parsed.length) {
+          console.log(label + ": fetched " + parsed.length + " articles");
+          return parsed;
+        }
+      } else {
+        console.warn(label + " returned HTTP " + res.status);
+      }
+    } catch (e) {
+      console.warn(label + " fetch failed: " + e.message);
     }
-  } catch (e) {
-    console.warn("Lanka C News JSON fetch failed: " + e.message);
+    return [];
   }
 
-  // 2. Fallback to direct Lanka C News RSS XML feed
-  if (allItems.length === 0) {
+  // Helper to fetch XML (RSS or Atom)
+  async function tryFetchXml(url, label) {
     try {
-      const res = await fetch("https://www.lankacnews.com/feeds/posts/default?alt=rss", {
+      const res = await fetch(url, {
         headers: { "User-Agent": "NewsSriLanka24-StaticBuilder/1.0" }
       });
       if (res.ok) {
         const xml = await res.text();
-        const parsed = parseRssXml(xml);
-        console.log("Lanka C News (Blogger XML fallback): fetched " + parsed.length + " articles");
-        allItems = allItems.concat(parsed);
+        let parsed = parseRssXml(xml);
+        if (!parsed.length) {
+          parsed = parseAtomXml(xml);
+        }
+        if (parsed.length) {
+          console.log(label + ": fetched " + parsed.length + " articles");
+          return parsed;
+        }
+      } else {
+        console.warn(label + " returned HTTP " + res.status);
       }
     } catch (e) {
-      console.warn("Lanka C News XML fallback failed: " + e.message);
+      console.warn(label + " fetch failed: " + e.message);
     }
+    return [];
   }
 
-  // 3. Additional feeds from RSS_FEEDS (if any)
+  // 1. Direct Lanka C News Blogger JSON API
+  const lankaJson = await tryFetchBloggerJson("https://www.lankacnews.com/feeds/posts/default?alt=json&max-results=48", "Lanka C News (Blogger JSON)");
+  allItems = allItems.concat(lankaJson);
+
+  // 2. Direct Blogger ID JSON API fallback
+  if (allItems.length === 0) {
+    const bloggerJson = await tryFetchBloggerJson("https://www.blogger.com/feeds/3005203787208851684/posts/default?alt=json&max-results=48", "Blogger ID (JSON fallback)");
+    allItems = allItems.concat(bloggerJson);
+  }
+
+  // 3. Direct Lanka C News RSS XML feed fallback
+  if (allItems.length === 0) {
+    const lankaRss = await tryFetchXml("https://www.lankacnews.com/feeds/posts/default?alt=rss", "Lanka C News (Blogger RSS XML fallback)");
+    allItems = allItems.concat(lankaRss);
+  }
+
+  // 4. Lanka C News Atom XML feed fallback
+  if (allItems.length === 0) {
+    const lankaAtom = await tryFetchXml("https://www.lankacnews.com/feeds/posts/default", "Lanka C News (Atom XML fallback)");
+    allItems = allItems.concat(lankaAtom);
+  }
+
+  // 5. Blogger direct Atom XML fallback
+  if (allItems.length === 0) {
+    const bloggerAtom = await tryFetchXml("https://www.blogger.com/feeds/3005203787208851684/posts/default", "Blogger ID (Atom XML fallback)");
+    allItems = allItems.concat(bloggerAtom);
+  }
+
+  // 6. Additional feeds from RSS_FEEDS (if any)
   for (const feedUrl of RSS_FEEDS) {
     try {
       const response = await fetch(feedUrl);
@@ -319,7 +409,8 @@ async function fetchRssItems() {
   allItems.forEach((item) => {
     if (item && item.link && !unique.has(item.link)) unique.set(item.link, item);
   });
-  return Array.from(unique.values()).slice(0, 48);
+  const sorted = Array.from(unique.values()).sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  return sorted.slice(0, 48);
 }
 
 
