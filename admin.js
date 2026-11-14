@@ -5,7 +5,7 @@ import { supabase } from "./supabase-config.js";
 // the function checks the caller is an authenticated admin, then dispatches
 // the build. Fire-and-forget: if it isn't deployed yet, the scheduled
 // workflow still covers regeneration automatically.
-const TRIGGER_FN_URL = "https://jwjqhzrdrvqxwcahxmmb.supabase.co/functions/v1/trigger-articles";
+const TRIGGER_FN_URL = "https://hibkoggylocbvfoqimni.supabase.co/functions/v1/trigger-articles";
 
 async function triggerInstantRegeneration() {
   try {
